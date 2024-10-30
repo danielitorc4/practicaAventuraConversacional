@@ -1,16 +1,22 @@
-package dam.islasfilipinas.practicaAventuraConversacional;
+package dam.islasfilipinas.aventuraConversacional;
 
 import java.util.Scanner;
 
-public class aventuraConversacional {
+public class practicaAventuraConversacional {
 
 	public static void main(String[] args) {
 		Scanner scan = new Scanner(System.in);
 		boolean fin = false;
-		String[][][] mundo = new String[11][9][3];
+		String[][][] mundo = new String[11][9][4];
 		int[] posicion = { 6, 6, 1 }; // Posición inicial del jugador en el piso base
 
-		System.out.println("Te despiertas desconcertado");
+		System.out.println("Te despiertas desconcertado en medio de un camino. Miras a tus alrededores. \n"
+				+ "Hacia el norte ves una gran mansión un tanto espeluznante. \n"
+				+ "Hacia el este parece haber solo mar, pero avistas en la orilla una lancha. \n"
+				+ "Hacia el oeste parece haber una especie de cobertizo o trastero. \n"
+				+ "Miras detrás de tí hacia el sur, pero solo está el oceano... \n" 
+				+ "Todo esto me resulta extrañamente familiar \n"
+				+ "¿Qué debería hacer primero? Te preguntas mientras te levantas del suelo \n");
 		
 		do {
 			System.out.println("Ingresa una dirección o acción (escribe menu para ver todas las opciones): ");
@@ -46,42 +52,42 @@ public class aventuraConversacional {
 				if (y < mundo[x].length - 1) { // Limite norte
 					y++;
 				} else {
-					System.out.println("No puedes moverte más al norte.");
+					System.out.println("No puedes subir más.");
 				}
 			}
 			case "abajo", "s" -> {
 				if (y > 0) { // Limite sur
 					y--;
 				} else {
-					System.out.println("No puedes moverte más al sur.");
+					System.out.println("No puedes bajar más.");
 				}
 			}
 			case "izquierda", "a" -> {
 				if (x > 0) { // Limite oeste
 					x--;
 				} else {
-					System.out.println("No puedes moverte más al oeste.");
+					System.out.println("No puedes moverte más a la izquierda.");
 				}
 			}
 			case "derecha", "d" -> {
 				if (x < mundo.length - 1) { // Limite este
 					x++;
 				} else {
-					System.out.println("No puedes moverte más al este.");
+					System.out.println("No puedes moverte más a la derecha.");
 				}
 			}
 			case "entrar", "in" -> {
 				if (z < mundo[x][y].length - 1) { // Aumentar la dimensión z
 					z++;
 				} else {
-					System.out.println("No puedes entrar más alto.");
+					System.out.println("No hay ninguna entrada.");
 				}
 			}
 			case "salir", "out" -> {
-				if (z > 0) { // Disminuir la dimensión z (profundidad)
+				if (z > 0) { // Disminuir la dimensión z
 					z--;
 				} else {
-					System.out.println("No puedes salir más bajo.");
+					System.out.println("No hay ninguna salida.");
 				}
 			}
 			case "interactuar", "e" -> {
@@ -98,7 +104,7 @@ public class aventuraConversacional {
 		posicion[1] = y;
 		posicion[2] = z;
 
-		// Mensaje de la nueva posición
+		// Mensaje de la nueva posición, en un futuro dirá el nombre de la casilla en lugar de coordenadas
 		System.out.printf("Te has movido a la posición: [ %d | %d | %d ] %n%n", x, y, z);
 	}
 
