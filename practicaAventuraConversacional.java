@@ -9,6 +9,7 @@ public class practicaAventuraConversacional {
 		boolean fin = false;
 		String[][][] mundo = new String[11][9][4];
 		int[] posicion = { 5, 3, 1 }; // Posición inicial del jugador en el piso base
+		boolean tieneLancha = false; // Bandera para saber si el jugador tiene una lancha
 
 		inicializarMundo(mundo); // Llamada a la función para llenar las descripciones
 
@@ -33,7 +34,7 @@ public class practicaAventuraConversacional {
 							+ "Salir / Out %n Interactuar / E (No implementado) %n Terminar = salir del juego %n%n");
 				}
 				default -> {
-					moverse(mundo, posicion, direccion);
+					moverse(mundo, posicion, direccion, tieneLancha);
 	
 				}
 			}
@@ -43,7 +44,7 @@ public class practicaAventuraConversacional {
 		scan.close();
 	}
 
-	public static void moverse(String[][][] mundo, int[] posicion, String direccion) {
+	public static void moverse(String[][][] mundo, int[] posicion, String direccion, boolean tieneLancha) {
 		// Variables para las coordenadas
 		int x = posicion[0];
 		int y = posicion[1];
@@ -76,14 +77,19 @@ public class practicaAventuraConversacional {
 				return; // Termina la función si la dirección no es válida
 			}
 		}
-
+		
+        String tipoCasilla = mundo[x][y][z]; // Obtener el tipo de casilla actual
+        
+        // Verifica colisiones antes de actualizar la posición
+        if (!puedeMoverse(tipoCasilla, tieneLancha)) {
+            System.out.println("No puedes moverte a esa casilla.");
+            return; // Salir si hay colisión
+        }
+		
 		// Actualiza la posición del jugador
 		posicion[0] = x;
 		posicion[1] = y;
 		posicion[2] = z;
-
-		// Obtener el tipo de casilla actual
-		String tipoCasilla = mundo[x][y][z];
 
 		// Mensaje de la nueva posición, en un futuro dirá el nombre de la casilla en
 		// lugar de coordenadas
@@ -155,6 +161,7 @@ public class practicaAventuraConversacional {
 	}
 
 	private static int moverseAbajo(int y) {
+
 		if (y > 0) { // Limite sur
 			y--;
 		} else {
@@ -163,11 +170,22 @@ public class practicaAventuraConversacional {
 		return y;
 	}
 
+	private static boolean puedeMoverse(String tipoCasilla, boolean tieneLancha) {
+        if ("casa".equals(tipoCasilla)) {
+            return false; // No se puede mover a casa
+        }
+        if ("agua".equals(tipoCasilla) && !tieneLancha) {
+            return false; // No se puede mover a agua sin lancha
+        }
+        return true; // Puede moverse a otras casillas
+    }
+	
 	public static void inicializarMundo(String[][][] mundo) {
 
-		// Casa en la fila 1 (y=8)
 		for (int x = 0; x <= 10; x++) {
-			mundo[x][8][1] = "casa";
+			mundo[x][8][1] = "casa"; 	// Casa en la fila 1 (y=8)
+			mundo[x][4][1] = "blanca"; 	// Casillas blancas en la fila 4
+			mundo[x][1][1] = "agua";	// Agua en la fila 8 (y=1)
 		}
 		// Casa en la fila 2 (y=7) excepto en la posición (5,7,1)
 		for (int x = 0; x <= 10; x++) {
@@ -180,11 +198,29 @@ public class practicaAventuraConversacional {
 			mundo[x][5][1] = "blanca";
 		}
 		
-		// Casillas blancas en la fila 4
+		// Casillas de la fila 3
 		for (int x = 0; x <= 10; x++) {
-			mundo[x][4][1] = "blanca";
+			switch (x) {
+				case 1, 2 -> {
+					mundo[x][3][1] = "cobertizo";
+				}
+				case 5 -> {
+					mundo[5][3][1] = "inicio";
+				}
+				case 7 -> {
+					mundo[7][3][1] = "lancha";
+				}
+				default -> {
+					mundo[x][3][1] = "blanca";
+				}
+			}
 		}
 		
+		// Casillas de la fila 2
+		for (int x = 0; x <= 10; x++) {
+			 mundo[x][2][1] = (x <= 8) ? "agua" : "continente";
+		}
+
 		// Aquí las excepciones
 		mundo[5][7][1] = "entrada";
 
