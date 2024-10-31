@@ -5,7 +5,9 @@ import java.util.Scanner;
 public class practicaAventuraConversacional {
 
 	static int barraDeVida = 100; // Barra de vida del personaje
-	// Maybe meter los booleanos como variables globales para no llenar de parámetros las funciones
+	static boolean tieneLancha;
+	static boolean puedeEntrar;  // Aquí los booleanos para no llenar las funciones de parámetros
+	static boolean puedeSalir;
 	
 	public static void main(String[] args) {
 		Scanner scan = new Scanner(System.in);
@@ -39,7 +41,7 @@ public class practicaAventuraConversacional {
 							+ "Salir / Out %n Interactuar / E (No implementado) %n Terminar = salir del juego %n%n");
 				}
 				default -> {
-					moverse(mundo, posicion, direccion, tieneLancha, puedeEntrar, puedeSalir);
+					moverse(mundo, posicion, direccion);
 	
 				}
 			}
@@ -56,7 +58,7 @@ public class practicaAventuraConversacional {
 		scan.close();
 	}
 
-	public static void moverse(String[][][] mundo, int[] posicion, String direccion, boolean tieneLancha, boolean puedeEntrar, boolean puedeSalir) {
+	public static void moverse(String[][][] mundo, int[] posicion, String direccion) {
 		// Variables para las coordenadas
 		int x = posicion[0];
 		int y = posicion[1];
@@ -98,7 +100,7 @@ public class practicaAventuraConversacional {
 		tipoCasilla = mundo[x][y][z]; // Obtener el tipo de casilla actual
         
         // Verifica colisiones antes de actualizar la posición
-        if (!puedeMoverse(tipoCasilla, tieneLancha)) {
+        if (!puedeMoverse(tipoCasilla)) {
             return; // Salir si hay colisión
         }
         
@@ -126,7 +128,7 @@ public class practicaAventuraConversacional {
 				case "entrada" ->
 					System.out.println("Te encuentras frente a la entrada de la casa. Necesitas una llave para abrirla.");
 				default -> System.out.println("Estás en una zona desconocida.");
-				}
+			}
 		}
 
 	
@@ -187,7 +189,7 @@ public class practicaAventuraConversacional {
 		return y;
 	}
 
-	private static boolean puedeMoverse(String tipoCasilla, boolean tieneLancha) {
+	private static boolean puedeMoverse(String tipoCasilla) {
         if (tipoCasilla.equals("casa")) {
         	 System.out.println("¡Ouch! Te has chocado contra una pared"); 
         	barraDeVida = perderVida(1);
