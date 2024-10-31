@@ -293,15 +293,15 @@ public class practicaAventuraConversacional {
 	
 	}
 
-	private static void impresionesRestantes(String impresion) {
+	private static void impresionesRestantes(String impresion) { 
 		switch (impresion) {
-		case "menu" -> {
-			System.out.printf(" Arriba / W %n Izquierda / A %n Abajo / S %n Derecha / D %n Entrar / In %n "
-					+ "Salir / Out %n Interactuar / E (No implementado) %n Salir = salir del juego %n%n");
-		}
-		default -> {
-			System.out.println("No hay texto asignado");
-		}
+			case "menu" -> {
+				System.out.printf(" Arriba / W %n Izquierda / A %n Abajo / S %n Derecha / D %n Entrar / In %n "
+						+ "Salir / Out %n Interactuar / E (No implementado) %n Salir = salir del juego %n%n");
+			}
+			default -> {
+				System.out.println("No hay texto asignado");
+			}
 		}
 	}
 	
