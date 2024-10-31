@@ -11,34 +11,23 @@ public class practicaAventuraConversacional {
 	
 	public static void main(String[] args) {
 		Scanner scan = new Scanner(System.in);
-		boolean fin = false;
+		boolean fin = false, salir = false;
 		String[][][] mundo = new String[11][9][4];
 		int[] posicion = { 5, 3, 1 }; // Posición inicial del jugador en el piso base
-		boolean tieneLancha = false; // Bandera para saber si el jugador tiene una lancha
-		boolean puedeEntrar = false;
-		boolean puedeSalir = false;
 
 		inicializarMundo(mundo); // Llamada a la función para llenar las descripciones
 
-		System.out.println("Te despiertas desconcertado en medio de un camino. Miras a tus alrededores. \n\n"
-				+ "Hacia el norte ves una gran mansión un tanto espeluznante. \n"
-				+ "Hacia el este parece haber solo mar, pero avistas en la orilla una lancha. \n"
-				+ "Hacia el oeste parece haber una especie de cobertizo o trastero. \n"
-				+ "Miras detrás de tí hacia el sur, pero solo está el oceano... \n"
-				+ "Todo esto me resulta extrañamente familiar \n\n"
-				+ "¿Qué debería hacer primero? Te preguntas mientras te levantas del suelo \n");
+		imprimirHistoria("inicio");
 
 		do {
 			System.out.println("Ingresa una dirección o acción (escribe menu para ver todas las opciones): ");
 			String direccion = scan.nextLine();
 			switch (direccion.toLowerCase()) {
-				case "terminar" -> {
-					System.out.println("Has salido del juego");
-					fin = true;
+				case "salir" -> {
+					salir = true;
 				}
 				case "menu" -> {
-					System.out.printf(" Arriba / W %n Izquierda / A %n Abajo / S %n Derecha / D %n Entrar / In %n "
-							+ "Salir / Out %n Interactuar / E (No implementado) %n Terminar = salir del juego %n%n");
+					impresionesRestantes("menu");
 				}
 				default -> {
 					moverse(mundo, posicion, direccion);
@@ -46,14 +35,17 @@ public class practicaAventuraConversacional {
 				}
 			}
 
-		} while (fin == false && barraDeVida > 0);
+		} while (salir == false && barraDeVida > 0 && fin == false);
 
 		if (fin == true) {
 			System.out.println("¡Felicidades, has logrado escapar de la isla!"); /* Se cambiará a algo relacionado con la historia		*
 			 																	  * como mirar hacia atrás pensando en lo que has hecho	*/
+		} else if (salir == true) {
+			System.out.println("Has salido del juego");
 		} else {
-			System.out.println("Has muerto"); // Maybe añadir causa de la muerte en un futuro
+			System.out.println("Has muerto");
 		}
+		
 		
 		scan.close();
 	}
@@ -115,24 +107,11 @@ public class practicaAventuraConversacional {
 		System.out.printf("Te has movido a la posición: [ %d | %d | %d ] %n%n", x, y, z);
 		
 		// Mostrar la descripción basada en el tipo de casilla
-		if (tipoCasilla != null) {
-			switch (tipoCasilla) {
-				case "casa" -> System.out.println("Estás frente a una gran casa de aspecto misterioso.");
-				case "cobertizo" -> System.out.println("Encuentras un cobertizo. Quizá haya algo útil en su interior.");
-				case "agua" -> System.out.println("Ves agua frente a ti. Necesitas una lancha para avanzar.");
-				case "continente" ->
-					System.out.println("Has llegado al continente. ¡Felicidades, has alcanzado el fin del juego!");
-				case "caseta" -> System.out.println("Ves una caseta de perro. Un perro hambriento te observa.");
-				case "lancha" -> System.out.println("Encuentras una lancha, pero parece que necesita combustible.");
-				case "inicio" -> System.out.println("Estás en el lugar donde comenzaste tu aventura.");
-				case "entrada" ->
-					System.out.println("Te encuentras frente a la entrada de la casa. Necesitas una llave para abrirla.");
-				default -> System.out.println("Estás en una zona desconocida.");
-			}
-		}
-
+		descripcionCasilla(tipoCasilla);
 	
 	}
+
+
 
 	private static int accionSalir(int z) {
 		if (z > 0) { // Disminuir la dimensión z
@@ -274,6 +253,57 @@ public class practicaAventuraConversacional {
 		return barraDeVida; // Devolver la vida actual
 	}
 	
-}
+	public static void imprimirHistoria(String fragmentoHistoria) {
+		switch (fragmentoHistoria) {
+		
+			case "inicio" -> {
+				System.out.println("Te despiertas desconcertado en medio de un camino. Miras a tus alrededores. \n\n"
+						+ "Hacia el norte ves una gran mansión un tanto espeluznante. \n"
+						+ "Hacia el este parece haber solo mar, pero avistas en la orilla una lancha. \n"
+						+ "Hacia el oeste parece haber una especie de cobertizo o trastero. \n"
+						+ "Miras detrás de tí hacia el sur, pero solo está el oceano... \n"
+						+ "Todo esto me resulta extrañamente familiar \n\n"
+						+ "¿Qué debería hacer primero? Te preguntas mientras te levantas del suelo \n");
+			}
+			case "nota" -> {
+				// Diálogo de la nota
+			}
+			default -> {
+				System.out.println("Este diálogo no existe");
+			}
+		
+		}
+	}
+	
+	private static void descripcionCasilla(String tipoCasilla) {
+		if (tipoCasilla != null) {
+			switch (tipoCasilla) {
+				case "cobertizo" -> System.out.println("Encuentras un cobertizo. Quizá haya algo útil en su interior.");
+				case "agua" -> System.out.println("Ves agua frente a ti. Necesitas una lancha para avanzar.");
+				case "continente" ->
+					System.out.println("Has llegado al continente. ¡Felicidades, has alcanzado el fin del juego!");
+				case "caseta" -> System.out.println("Ves una caseta de perro. Un perro hambriento te observa.");
+				case "lancha" -> System.out.println("Encuentras una lancha, pero parece que necesita combustible.");
+				case "inicio" -> System.out.println("Estás en el lugar donde comenzaste tu aventura.");
+				case "entrada" ->
+					System.out.println("Te encuentras frente a la entrada de la casa. Necesitas una llave para abrirla.");
+				default -> System.out.println("Estás en una zona desconocida.");
+			}
+		}
+	
+	}
 
+	private static void impresionesRestantes(String impresion) {
+		switch (impresion) {
+		case "menu" -> {
+			System.out.printf(" Arriba / W %n Izquierda / A %n Abajo / S %n Derecha / D %n Entrar / In %n "
+					+ "Salir / Out %n Interactuar / E (No implementado) %n Salir = salir del juego %n%n");
+		}
+		default -> {
+			System.out.println("No hay texto asignado");
+		}
+		}
+	}
+	
+}
 	
