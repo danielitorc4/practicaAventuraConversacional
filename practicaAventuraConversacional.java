@@ -4,12 +4,16 @@ import java.util.Scanner;
 
 public class practicaAventuraConversacional {
 
+	static int barraDeVida = 100; // Barra de vida del personaje
+	
 	public static void main(String[] args) {
 		Scanner scan = new Scanner(System.in);
 		boolean fin = false;
 		String[][][] mundo = new String[11][9][4];
 		int[] posicion = { 5, 3, 1 }; // Posición inicial del jugador en el piso base
 		boolean tieneLancha = false; // Bandera para saber si el jugador tiene una lancha
+		boolean puedeEntrar = false;
+		boolean puedeSalir = false;
 
 		inicializarMundo(mundo); // Llamada a la función para llenar las descripciones
 
@@ -34,21 +38,29 @@ public class practicaAventuraConversacional {
 							+ "Salir / Out %n Interactuar / E (No implementado) %n Terminar = salir del juego %n%n");
 				}
 				default -> {
-					moverse(mundo, posicion, direccion, tieneLancha);
+					moverse(mundo, posicion, direccion, tieneLancha, puedeEntrar, puedeSalir);
 	
 				}
 			}
 
-		} while (fin == false);
+		} while (fin == false && barraDeVida > 0);
 
+		if (fin == true) {
+			System.out.println("¡Felicidades, has logrado escapar de la isla!"); /* Se cambiará a algo relacionado con la historia		*
+			 																	  * como mirar hacia atrás pensando en lo que has hecho	*/
+		} else {
+			System.out.println("Has muerto"); // Maybe añadir causa de la muerte en un futuro
+		}
+		
 		scan.close();
 	}
 
-	public static void moverse(String[][][] mundo, int[] posicion, String direccion, boolean tieneLancha) {
+	public static void moverse(String[][][] mundo, int[] posicion, String direccion, boolean tieneLancha, boolean puedeEntrar, boolean puedeSalir) {
 		// Variables para las coordenadas
 		int x = posicion[0];
 		int y = posicion[1];
 		int z = posicion[2];
+		String tipoCasilla = mundo[x][y][z]; // Obtener el tipo de casilla inicial
 
 		switch (direccion.toLowerCase()) {
 			case "arriba", "w" -> {
@@ -64,10 +76,14 @@ public class practicaAventuraConversacional {
 				x = moverDerecha(mundo, x);
 			}
 			case "entrar", "in" -> {
-				z = accionEntrar(mundo, x, y, z);
+				if (puedeEntrar(tipoCasilla)) {  // Verifica si puedes entrar antes de cambiar z
+					z = accionEntrar(mundo, x, y, z);
+				}
 			}
 			case "salir", "out" -> {
-				z = accionSalir(z);
+				if (puedeSalir(tipoCasilla)) {  // Verifica si puedes salir antes de cambiar z
+					z = accionSalir(z);
+				}
 			}
 			case "interactuar", "e" -> {
 				System.out.println("No implementado");
@@ -78,13 +94,13 @@ public class practicaAventuraConversacional {
 			}
 		}
 		
-        String tipoCasilla = mundo[x][y][z]; // Obtener el tipo de casilla actual
+		tipoCasilla = mundo[x][y][z]; // Obtener el tipo de casilla actual
         
         // Verifica colisiones antes de actualizar la posición
         if (!puedeMoverse(tipoCasilla, tieneLancha)) {
-            System.out.println("No puedes moverte a esa casilla.");
             return; // Salir si hay colisión
         }
+        
 		
 		// Actualiza la posición del jugador
 		posicion[0] = x;
@@ -171,14 +187,37 @@ public class practicaAventuraConversacional {
 	}
 
 	private static boolean puedeMoverse(String tipoCasilla, boolean tieneLancha) {
-        if ("casa".equals(tipoCasilla)) {
+        if (tipoCasilla.equals("casa")) {
+        	 System.out.println("¡Ouch! Te has chocado contra una pared"); 
+        	barraDeVida = perderVida(1);
             return false; // No se puede mover a casa
         }
-        if ("agua".equals(tipoCasilla) && !tieneLancha) {
+        if (tipoCasilla.equals("agua") && !tieneLancha) {
+        	System.out.println("Ves el agua en tus pies. Nadar sería inútil... debe haber otro modo");
             return false; // No se puede mover a agua sin lancha
         }
         return true; // Puede moverse a otras casillas
     }
+	
+	private static boolean puedeEntrar(String tipoCasilla) {
+		if (tipoCasilla.equals("entrada")) { // Ir añadiendo más tipos de casilla como "escaleras" según avance hasta encontrar una solución limpia
+			System.out.println("Has entrado en la casa"); // Mejor añadir las escaleras en otro if, para más diálogos.
+			return true;
+		} else {
+			System.out.println("No puedes pasar");
+			return false;
+		}
+	}
+	
+	private static boolean puedeSalir(String tipoCasilla) {
+		if (tipoCasilla.equals("entrada")) { // Ir añadiendo más tipos de casilla como "escaleras" según avance hasta encontrar una solución limpia
+			System.out.println("Has salido de la casa"); // Mejor añadir las escaleras en otro if, para más diálogos. Para ir al sótano hará falta llave
+			return true;
+		} else {
+			System.out.println("No puedes pasar");
+			return false;
+		}
+	}
 	
 	public static void inicializarMundo(String[][][] mundo) {
 
@@ -225,4 +264,13 @@ public class practicaAventuraConversacional {
 		mundo[5][7][1] = "entrada";
 
 	}
+	
+	public static int perderVida(int damage) {
+		barraDeVida -= damage; // Restarle el daño recibido a la vida
+		System.out.printf("Tienes %d de vida \n", barraDeVida);
+		return barraDeVida; // Devolver la vida actual
+	}
+	
 }
+
+	
