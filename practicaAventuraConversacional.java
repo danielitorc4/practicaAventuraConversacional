@@ -5,6 +5,7 @@ import java.util.Scanner;
 public class practicaAventuraConversacional {
 
 	static int barraDeVida = 100; // Barra de vida del personaje
+	// Maybe meter los booleanos como variables globales para no llenar de parámetros las funciones
 	
 	public static void main(String[] args) {
 		Scanner scan = new Scanner(System.in);
