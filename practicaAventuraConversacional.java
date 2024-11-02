@@ -3,13 +3,20 @@ package dam.islasfilipinas.aventuraConversacional;
 import java.util.Scanner;
 
 public class practicaAventuraConversacional {
-
+		
 	static int barraDeVida = 100; // Barra de vida del personaje
 	static boolean tieneLancha;	 // No sé si hay una manera de agrupar los booleanos, me parece que queda muy sucio
 	static boolean puedeEntrar;  // y me da la sensación de que existe algo para ello
 	static boolean puedeSalir;	  
+	static boolean puedeInteractuar;
 	static boolean llaveMansion; // La llave de la mansión	
 	static boolean mansionAbierta; // La puerta se ha abierto (interactuando con la E en ella teniendo la llave)
+	static boolean carneCongelada; // Carne para el perro
+	static boolean perroLadrando; // Ruido para el monstruo
+	static boolean perroMuerto;
+	static boolean monstruoEscaleras;
+	static boolean tieneNota;
+	static boolean tresEnRayaHecho;
 	
 	public static void main(String[] args) {
 		Scanner scan = new Scanner(System.in);
@@ -22,7 +29,7 @@ public class practicaAventuraConversacional {
 		imprimirHistoria("inicio");
 
 		do {
-			System.out.println("Ingresa una dirección o acción (escribe menu para ver todas las opciones): ");
+			System.out.println("\nIngresa una dirección o acción (escribe menu para ver todas las opciones): ");
 			String direccion = scan.nextLine();
 			switch (direccion.toLowerCase()) {
 				case "terminar" -> {
@@ -37,12 +44,12 @@ public class practicaAventuraConversacional {
 				}
 			}
 
-		} while (terminar == false && barraDeVida > 0 && fin == false);
+		} while (!terminar && barraDeVida > 0 && !fin);
 
-		if (fin == true) {
+		if (fin) {
 			System.out.println("¡Felicidades, has logrado escapar de la isla!"); /* Se cambiará a algo relacionado con la historia		*
 			 																	  * como mirar hacia atrás pensando en lo que has hecho	*/
-		} else if (terminar == true) {
+		} else if (terminar) {
 			System.out.println("Has salido del juego");
 		} else {
 			System.out.println("Has muerto");
@@ -83,7 +90,9 @@ public class practicaAventuraConversacional {
 				}
 			}
 			case "interactuar", "e" -> {
-				System.out.println("No implementado");
+				if (puedeInteractuar(tipoCasilla)) {
+					accionInteractuar(tipoCasilla);
+				}
 			}
 			default -> {
 				System.out.println("Dirección no válida.");
@@ -98,18 +107,20 @@ public class practicaAventuraConversacional {
             return; // Salir si hay colisión
         }
         
-		
+		int aux1 = posicion[0];
+		int aux2 = posicion[1];
+		int aux3 = posicion[2];
 		// Actualiza la posición del jugador
 		posicion[0] = x;
-		posicion[1] = y;
+		posicion[1] = y;	// Estos auxiliares guardan la posición anterior, para luego imprimir solo cuando se actualiza
 		posicion[2] = z;
 
-		// Mensaje de la nueva posición, en un futuro dirá el nombre de la casilla en
-		// lugar de coordenadas
-		System.out.printf("Te has movido a la posición: [ %d | %d | %d ] %s %n%n", x, y, z, tipoCasilla);
-		
-		// Mostrar la descripción basada en el tipo de casilla
-		descripcionCasilla(tipoCasilla, z);
+		// Mensaje de la nueva posición y descripción de la casilla
+		if (posicion[0] != aux1 || posicion[1] != aux2 || posicion[2] != aux3) {
+			System.out.printf("Te has movido a la posición: [ %d | %d | %d ] %s %n%n", x, y, z, tipoCasilla);
+			// Mostrar la descripción basada en el tipo de casilla
+			descripcionCasilla(tipoCasilla, z);
+		}
 	
 	}
 
@@ -131,6 +142,44 @@ public class practicaAventuraConversacional {
 		return z;
 	}
 
+	private static void accionInteractuar(String tipoCasilla) {
+		switch (tipoCasilla) {
+			case "entrada" -> {
+				if (!llaveMansion) {
+					System.out.println("Necesitas una llave");
+				} else if (!mansionAbierta) {
+					System.out.println("Has abierto la puerta");	
+					mansionAbierta = true;
+				} else {
+					System.out.println("La puerta ya está abierta");
+				}
+			}
+			case "cobertizo" -> {
+				if (!llaveMansion) {
+					imprimirHistoria("cobertizo");
+					llaveMansion = true;
+				} else {
+					System.out.println("No hay nada que consideres de valor aquí.");
+				}
+			}
+			case "caseta" -> {
+				if (!carneCongelada) {
+					System.out.println("El perro te muerde la pierna");
+					perderVida(20);
+				} else if (!perroLadrando) {
+					System.out.println("El perro devora de 2 mordiscos el filete y comienza a ladrar sin parar");
+				} else if (!perroMuerto) {
+					System.out.println("El perro sigue ladrando");
+				} else {
+					System.out.println("El perro está muerto...");
+				}
+			}
+			default -> {
+				System.out.println("No hay nada con lo que interactuar");
+			}
+		}
+	}
+	
 	private static int moverDerecha(String[][][] mundo, int x) {
 		if (x < mundo.length - 1) { // Limite este
 			x++;
@@ -169,28 +218,32 @@ public class practicaAventuraConversacional {
 	}
 
 	private static boolean puedeMoverse(String tipoCasilla) {
-        if (tipoCasilla.equals("casa")) {
-        	 System.out.println("¡Ouch! Te has chocado contra una pared"); 
-        	barraDeVida = perderVida(1);
-            return false; // No se puede mover a casa
+ 
+        switch (tipoCasilla) {
+	        case "casa" -> {
+	        	System.out.println("¡Ouch! Te has chocado contra una pared"); 
+	          	barraDeVida = perderVida(1);
+	          	return false;
+	        }
+	        case "agua" -> {
+	        	if (tieneLancha == false) {
+	        		System.out.println("Ves el agua en tus pies. Nadar sería inútil... debe haber otro modo");
+	                return false; // No se puede mover a agua sin lancha
+	        	} else {
+	        		return true;
+	        	}
+	        }
+	        default -> {
+	        	return true;
+	        }
         }
-        if (tipoCasilla.equals("agua") && !tieneLancha) {
-        	System.out.println("Ves el agua en tus pies. Nadar sería inútil... debe haber otro modo");
-            return false; // No se puede mover a agua sin lancha
-        }
-        return true; // Puede moverse a otras casillas
     }
 	
 	private static boolean puedeEntrar(String tipoCasilla, int z) {
 		
 		switch (tipoCasilla) { // Ir añadiendo más tipos de casilla como "escaleras" 
-			case "entrada" -> { // Hay que meter el boolean de la llave y que haya 2 opciones de texto "La puerta está cerrada" y "No hay donde entrar"
-				if (z < 2) {
-					System.out.println("Has entrado en la casa"); // Mejor añadir las escaleras en otro if, para más diálogos.
-					return true;
-				} else {
-					return false;
-				}
+			case "entrada" -> {
+				return true;
 			}
 			default -> {
 				System.out.println("No parece haber ninguna entrada"); 
@@ -218,6 +271,24 @@ public class practicaAventuraConversacional {
 		}
 	}
 	
+	private static boolean puedeInteractuar(String tipocasilla) {
+		switch (tipocasilla) {
+			case "cobertizo" -> {	
+				return true;
+			}
+			case "entrada" -> {
+				return true;
+			}
+			case "caseta" -> {
+				return true;
+			}
+			default -> {
+				System.out.println("No hay nada con lo que interactuar");
+				return false;
+			}
+		}
+	}
+	
 	public static void inicializarMundo(String[][][] mundo) {
 
 		inicializarPiso1(mundo);
@@ -236,15 +307,15 @@ public class practicaAventuraConversacional {
 		}
 		
 		// Casilla blanca en las filas 6 y 5
-		for (int x = 2; x <= 10; x++) {
-			mundo[x][6][1] = "jardin";
-			mundo[x][5][1] = "jardin";
+		for (int x = 0; x <= 10; x++) {
+			mundo[x][6][1] = ( x < 2) ? "caseta" : "jardin";
+			mundo[x][5][1] = ( x < 2) ? "caseta" : "jardin";
 		}
 		
 		// Casillas de la fila 3
 		for (int x = 0; x <= 10; x++) {
 			switch (x) {
-				case 1, 2 -> {
+				case 0, 1 -> {
 					mundo[x][3][1] = "cobertizo";
 				}
 				case 5 -> {
@@ -252,6 +323,9 @@ public class practicaAventuraConversacional {
 				}
 				case 7 -> {
 					mundo[7][3][1] = "lancha";
+				}
+				case 8, 9, 10 -> {
+					mundo[x][3][1] = "agua";
 				}
 				default -> {
 					mundo[x][3][1] = "jardin";
@@ -349,13 +423,19 @@ public class practicaAventuraConversacional {
 		switch (fragmentoHistoria) {
 		
 			case "inicio" -> {
-				System.out.println("Te despiertas desconcertado en medio de un camino. Miras a tus alrededores. \n\n"
+				System.out.println("Te despiertas desconcertado en la orilla de una playa. Miras a tus alrededores. \n\n"
 						+ "Hacia el norte ves una gran mansión un tanto espeluznante. \n"
 						+ "Hacia el este parece haber solo mar, pero avistas en la orilla una lancha. \n"
 						+ "Hacia el oeste parece haber una especie de cobertizo o trastero. \n"
-						+ "Miras detrás de tí hacia el sur, pero solo está el oceano... \n"
+						+ "Miras detrás de tí hacia el sur, pero solo está el océano... \n"
 						+ "Todo esto me resulta extrañamente familiar \n\n"
-						+ "¿Qué debería hacer primero? Te preguntas mientras te levantas del suelo \n");
+						+ "¿Qué debería hacer primero? Te preguntas mientras te levantas del suelo.");
+			}
+			case "cobertizo" -> {
+				System.out.println("\nEntre todo el desorden te llama la atención una pequeña caja en la estantería. \n"
+						+ "Todo está lleno de polvo menos dicha caja, \n\"Se habrá abierto recientemente\" piensas. \n"
+						+ "En su interior encuentras una llave junto a colgante con la imagen de una mujer. \n"
+						+ "Por respeto solo te llevas la llave. \n"); // Si vuelves una vez recuperes tus recuerdos, podrás coger el medallón y desbloquear otro final
 			}
 			case "nota" -> {
 				// Diálogo de la nota
@@ -371,8 +451,9 @@ public class practicaAventuraConversacional {
 	private static void descripcionCasilla(String tipoCasilla, int z) {
 		if (tipoCasilla != null) {
 			switch (z) {
-			case 1 -> casillasPiso1(tipoCasilla);
-			default -> System.out.println("Ubicación desconocida");
+				case 1 -> casillasPiso1(tipoCasilla);
+				case 2 -> casillasPiso2(tipoCasilla);
+				default -> System.out.println("Ubicación desconocida");
 			}
 		}
 	}
@@ -380,10 +461,24 @@ public class practicaAventuraConversacional {
 	private static void casillasPiso1(String tipoCasilla) {
 		switch (tipoCasilla) {
 			case "jardin" -> System.out.println("Estás en el jardín de la mansión");
-			case "cobertizo" -> System.out.println("Encuentras un cobertizo. Quizá haya algo útil en su interior."); // Añadir if con boolean, si interactuas sin comida te muerde
+			case "cobertizo" -> {
+				if (llaveMansion == false) {
+					System.out.println("Encuentras un cobertizo. Quizá haya algo útil en su interior."); 
+				} else {
+					System.out.println("Te encuentras en el cobertizo de antes");
+				}
+			}
 			case "agua" -> System.out.println("Estás en el mar, hacia el sur puedes ver tierra nueva");
 			case "continente" -> System.out.println("Has llegado a tierra nueva");
-			case "caseta" -> System.out.println("Ves una caseta de perro. Un perro hambriento te observa."); // Añadir if con boolean
+			case "caseta" -> {
+				if (!perroLadrando) {
+					System.out.println("Ves una caseta de perro. Un perro hambriento te observa.");			
+				} else if (!perroMuerto) {
+					System.out.println("Estás en la caseta, el perro sigue ladrando");
+				} else {
+					System.out.println("Estás en la caseta del perro...");
+				}
+			}
 			case "lancha" -> System.out.println("Hay una lancha que podría resultar útil, desgraciadamente no parece tener combustible..."); // Añadir if con boolean
 			case "inicio" -> System.out.println("Estás en el lugar donde comenzaste tu aventura.");
 			case "entrada" -> {
@@ -397,19 +492,70 @@ public class practicaAventuraConversacional {
 		}
 	}
 
+
+	private static void casillasPiso2(String tipoCasilla) {
+		
+		switch (tipoCasilla) {
+			case "entrada" -> System.out.println( "Estás en la entrada de la mansión");
+			case "habitación" -> {
+				if (!tieneNota) {
+					System.out.println("Estás en una habitación, parece que hay una cómoda en una esquina");
+				} else {
+					System.out.println("Estás en la habitación de antes, no hay nada de interés");
+				}
+			}
+			case "congelador" -> {
+				if (!carneCongelada) {
+					System.out.println("Hay un congelador con algo en su interior");
+				} else {
+					System.out.println("Es el congelador de antes");
+				}
+			}
+			case "cocina" -> {
+				System.out.println("Estás en la cocina");
+			}
+			case "npcAsustado" -> {
+				if (!tresEnRayaHecho) {
+					System.out.println("Ves una figura encogida en una esquina, temblando.\n "
+							+ "Sus ojos, grandes y asustados, se clavan en el suelo, evitando cualquier mirada. \n"
+							+ "Sus lágrimas caen  al suelo mientras se cubre la cabeza con las manos, como intentando protegerse\n");
+				} else {
+					System.out.println("El pequeño ser sigue en la esquina temblando, parece haber dejado de llorar.");
+				}
+			}
+			case "escalera" -> {
+				if (!monstruoEscaleras) {
+					System.out.println("Estás en una grandes escaleras, unas suben y otras bajan."
+							+ "En la parte de arriba parece haber una figura muy grande");
+				} else {
+					System.out.println("Estás en las escaleras de la mansión");
+				}
+			}
+			case "comedor" -> {
+				if (!tresEnRayaHecho) {
+					System.out.println("Estas en el comedor, parece haber un... ¿niño? O algo parecido en una esquina. ");
+				} else {
+					System.out.println("Estás en el comedor");
+				}
+			}
+			
+		}
+	}
 	
 	public static void impresionesRestantes(String impresion) { 
 		switch (impresion) {
 			case "menu" -> {
 				System.out.printf(" Arriba / W %n Izquierda / A %n Abajo / S %n Derecha / D %n Entrar %n "
-						+ "Salir %n Interactuar / E (No implementado) %n Terminar = salir del juego %n%n");
+						+ "Salir %n Interactuar / E %n Terminar = salir del juego %n Mapa / M %n%n");
+			}
+			case "mapa", "m" -> {
+				System.out.println("No implementado");
 			}
 			default -> {
 				System.out.println("No hay texto asignado");
 			}
 		}
 	}
-	
 	
 }
 	
