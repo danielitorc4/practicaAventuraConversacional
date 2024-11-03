@@ -399,7 +399,7 @@ public class practicaAventuraConversacional {
 		do { // Bucle hasta que lo resuelvas o mueras
 			System.out.println("Pone: " + solucionDesordenada);
 			respuestaUsuario = scan.nextLine().toLowerCase();
-			if (!respuestaUsuario.equals(respuestaUsuario)) {
+			if (!(respuestaUsuario.equals(solucionPuzzle))) {
 				perderVida(25);
 				System.out.println("Una aguja te atraviesa el brazo, parece que esa no era la respuesta...");
 			} else {
