@@ -23,6 +23,11 @@ public class practicaAventuraConversacional {
 	static boolean palancaSotano; // Es lo mismo que una llave
 	static boolean sotanoAbierto;
 	static boolean rompecabezasHecho; // Puzzle de la cómoda
+	static boolean acertijoResuelto; // Puzzle del congelador
+	static boolean segundaVisitaComedor;
+	static boolean npcAsustadoVisto;
+	static boolean escopeta;
+	static boolean niñoMuerto;	// Relacionado con el bad ending
 	
 	static Scanner scan = new Scanner(System.in); // Este Scanner va a ser static hasta encontrar una alternativa ya que da error cerrar un nuevo Scanner
 												  // dentro de un método y no me gusta la idea de meterlo como parámetro porque entraría también en moverse como uno.
@@ -209,14 +214,176 @@ public class practicaAventuraConversacional {
 					ejecutarRompecabezasComoda(scan);
 				} else if (!tieneNota) {
 					imprimirHistoria("nota");
+					tieneNota = true;
 				} else {
 					System.out.println("No hay nada más de valor");
+				}
+			}
+			case "congelador" -> {
+				if (!acertijoResuelto) {
+					acertijoCongelador(); 
+				} else if (!carneCongelada) {
+					System.out.println("Coges un pedazo de carne congelada");
+				} else {
+					System.out.println("El congelador está vacío");
+				}
+			}
+			case "npcAsustado" -> {
+				if (!tresEnRayaHecho) {
+					ejecutarTresEnRaya();
+				} else if (escopeta) {
+					System.out.println("El niño se gira, rogando que no lo hagas, pero decides dispararle con la escopeta.");
+					niñoMuerto = true;
+				} else if (niñoMuerto){
+					System.out.println("Ya no reconoces a tu hijo");
+				} else {
+					System.out.println("El niño te ignora");
 				}
 			}
 			default -> {
 				System.out.println("No hay nada con lo que interactuar");
 			}
 		}
+	}
+	private static void ejecutarTresEnRaya() {
+		
+		System.out.println("Ves un par de cuchillos tirados por el suelo y unas marcas como de tres en raya en el suelo\n"
+				+ "Decides jugar a ver si llamas la atención de este ser\n");
+
+		 char[][] tablero = {
+		            {'1', '2', '3'},
+		            {'4', '5', '6'},
+		            {'7', '8', '9'}
+		        };
+		 
+        char jugador = 'X';
+        boolean juegoEnCurso = true;
+
+        while (juegoEnCurso) {
+            imprimirTablero(tablero);
+            System.out.print("Elige una posición (1-9): ");
+            int posicion = scan.nextInt();
+            scan.nextLine();
+            int fila = (posicion - 1) / 3;		// Calculo la posición de la i en la matriz
+            int columna = (posicion - 1) % 3;   // Calculo la posición de la j en la matriz
+            boolean movimientoValido = false;
+            
+            do { 	// Bucle hasta que se realice un movimiento válido
+            	if (tablero[fila][columna] != 'X' && tablero[fila][columna] != 'O') {
+            		
+            		tablero[fila][columna] = jugador; 	// Marcar la casilla con 'X'
+            	} else {
+            		System.out.println("Movimiento inválido, intenta de nuevo.");
+            		movimientoValido = false;
+            	}
+            } while (!movimientoValido);
+
+            // Comprobar si el jugador ha ganado
+            char ganador = comprobarGanador(tablero);
+            if (ganador == 'X') {
+                System.out.println("¡Has ganado!");
+                imprimirHistoria("npcPierdeTresEnRaya");
+                tresEnRayaHecho = true;
+                juegoEnCurso = false;
+            }
+            
+         // Turno del NPC
+            Random random = new Random();
+
+            do {
+                int npcPosicion = random.nextInt(9) + 1; // Genera un número del 1 al 9
+                fila = (npcPosicion - 1) / 3;
+                columna = (npcPosicion - 1) % 3;
+            } while (tablero[fila][columna] == 'X' || tablero[fila][columna] == 'O'); // Busca una casilla libre
+
+            tablero[fila][columna] = 'O'; // El NPC coloca su ficha
+            
+            if (ganador == 'O') {
+                System.out.println("¡El pequeño ser ha ganado!");
+                imprimirHistoria("npcGanaTresEnRaya");
+                juegoEnCurso = false;
+            } else if (tableroLleno(tablero)) {
+                imprimirTablero(tablero);
+                System.out.println("¡Es un empate!");
+                imprimirHistoria("npcEmpateTresEnRaya");
+                juegoEnCurso = false;
+            }
+        }
+        
+        
+        
+	}
+	
+	private static void imprimirTablero(char[][] tablero) {
+	        System.out.println("Tablero:");
+	        for (int i = 0; i < 3; i++) {
+	            System.out.println(" " + tablero[i][0] + " | " + tablero[i][1] + " | " + tablero[i][2]);
+	            if (i < 2) {
+	                System.out.println("---|---|---");
+	            }
+	        }
+	    }
+
+	private static char comprobarGanador(char[][] tablero) {
+	
+	    for (int i = 0; i < 3; i++) { // Comprobar filas
+	        if (tablero[i][0] == tablero[i][1] && tablero[i][1] == tablero[i][2]) {
+	            return tablero[i][0]; // Devuelve el ganador ('X' o 'O')
+	        }
+	    }
+	
+	    for (int i = 0; i < 3; i++) {  // Comprobar columnas
+	        if (tablero[0][i] == tablero[1][i] && tablero[1][i] == tablero[2][i]) {
+	            return tablero[0][i]; // Devuelve el ganador ('X' o 'O')
+	        }
+	    }
+	    
+	    // Comprobar diagonales
+	    if (tablero[0][0] == tablero[1][1] && tablero[1][1] == tablero[2][2]) {
+	        return tablero[1][1]; // Devuelve el ganador ('X' o 'O')
+	    }
+	    if (tablero[0][2] == tablero[1][1] && tablero[1][1] == tablero[2][0]) {
+	        return tablero[1][1]; // Devuelve el ganador ('X' o 'O')
+	    }
+	    return ' '; // No hay ganador
+	}
+	
+	private static boolean tableroLleno(char[][] tablero) {
+	    for (int i = 0; i < 3; i++) {
+	        for (int j = 0; j < 3; j++) {
+	            if (tablero[i][j] != 'X' && tablero[i][j] != 'O') {
+	                return false; // Si hay al menos una posición libre
+	            }
+	        }
+	    }
+	    return true; // El tablero está lleno
+	}
+	
+	private static void acertijoCongelador() {
+		System.out.println("Parece haber un seguro congelado con una adivinanza escrita");
+		String respuestaUsuario;
+		int numIntentos = 0;
+		
+		 do {
+		        System.out.println("\"De un líquido nací y en frío me quedé; si me dejas salir, lágrimas dejaré. ¿Qué soy?\"");
+		        System.out.print("Tu respuesta (o escribe 'stop' para abandonar): ");
+		        respuestaUsuario = scan.nextLine().toLowerCase();
+		        
+		        if (respuestaUsuario.equals("hielo")) { 
+		            System.out.println("¡Correcto! El congelador se ha abierto.");
+		            acertijoResuelto = true; 
+		        } else if (respuestaUsuario.equals("stop")) {
+		            System.out.println("Has decidido abandonar el minijuego. El congelador sigue cerrado.");
+		            return; 
+		        } else {
+		            System.out.println("Respuesta incorrecta. Notas cómo los dedos se te congelan con cada intento");
+		            numIntentos++;
+		            if (numIntentos == 2) {
+		            	perderVida(20);
+		            	numIntentos = 0;
+		            }
+		        }
+		    } while (!acertijoResuelto);
 	}
 
 	private static void ejecutarRompecabezasComoda(Scanner scan) {
@@ -232,14 +399,14 @@ public class practicaAventuraConversacional {
 		do { // Bucle hasta que lo resuelvas o mueras
 			System.out.println("Pone: " + solucionDesordenada);
 			respuestaUsuario = scan.nextLine().toLowerCase();
-			if (respuestaUsuario != solucionPuzzle) {
+			if (!respuestaUsuario.equals(respuestaUsuario)) {
 				perderVida(25);
 				System.out.println("Una aguja te atraviesa el brazo, parece que esa no era la respuesta...");
 			} else {
-				System.out.println("El mecanismo te ha soltado, resolviste el rompecabezas");
+				System.out.println("El mecanismo te ha soltado, resolviste el rompecabezas. La cómoda está abierta.");
 				rompecabezasHecho = true;
 			}
-		} while (respuestaUsuario != solucionPuzzle);
+		} while (!rompecabezasHecho);
 	}
 	
 	private static String desordenarLetras(String palabra) {
@@ -372,13 +539,7 @@ public class practicaAventuraConversacional {
 	
 	private static boolean puedeInteractuar(String tipocasilla) {
 		switch (tipocasilla) {
-			case "cobertizo" -> {	
-				return true;
-			}
-			case "entrada" -> {
-				return true;
-			}
-			case "caseta" -> {
+			case "cobertizo", "entrada", "caseta", "comoda", "congelador", "npcAsustado" -> {	
 				return true;
 			}
 			default -> {
@@ -444,7 +605,7 @@ public class practicaAventuraConversacional {
 	private static void inicializarPiso2(String[][][] mundo) {
 		
 		for (int x = 0; x <= 10; x++) {
-			mundo[x][8][2] = "Casa"; // Casa en la primera fila
+			mundo[x][8][2] = "casa"; // Casa en la primera fila
 		}
 		
 		for (int x = 3; x <= 9; x++) { // De x = 3 a x = 9 es salon, menos x = 5 que es la entrada
@@ -542,7 +703,17 @@ public class practicaAventuraConversacional {
 			case "npcAsustado" -> {
 				System.out.println("\nVes una figura encogida en una esquina, temblando.\n "
 						+ "Sus ojos, grandes y asustados, se clavan en el suelo, evitando cualquier mirada. \n"
-						+ "Sus lágrimas caen  al suelo mientras se cubre la cabeza con las manos, como intentando protegerse\n");
+						+ "Sus lágrimas caen al suelo mientras se cubre la cabeza con las manos, como intentando protegerse\n");
+			}
+			case "npcPierdeTresEnRaya" -> {
+				System.out.println("\nMe gustaría poder volver a mi habitación... pero mamá está muy enfadada y no me atrevo a subir..."
+						+ "\n Tiene que haber alguna forma de llamar su atención, algún ruido o algo.");
+			}
+			case "npcGanaTresEnRaya" -> {
+				System.out.println("Nunca consigues ganarme.");
+			}
+			case "npcEmpateTresEnRaya" -> {
+				System.out.println("El niño se queda en silencio.");
 			}
 			case "salon" -> {
 				System.out.println("El salón principal de la mansión es amplio y descuidado, con polvo acumulado y muebles cubiertos por sábanas viejas\n"
@@ -598,50 +769,61 @@ public class practicaAventuraConversacional {
 					imprimirHistoria("salon");
 					introduccionCasa = true;
 				} else {
-					System.out.println( "Estás en la entrada de la mansión");
+					System.out.println( "Estás en la entrada de la mansión.");
 				}	
 			}
 			case "habitación" -> {
 				if (!tieneNota) {
-					System.out.println("Estás en una habitación, parece que hay una cómoda en una esquina");
+					System.out.println("Estás en una habitación, parece que hay una cómoda en una esquina.");
 				} else {
-					System.out.println("Estás en la habitación de antes, no hay nada de interés");
+					System.out.println("Estás en la habitación de antes, no hay nada de interés.");
 				}
 			}
 			case "congelador" -> {
 				if (!carneCongelada) {
-					System.out.println("Hay un congelador con algo en su interior");
+					System.out.println("Hay un congelador con algo en su interior.");
 				} else {
-					System.out.println("Es el congelador de antes");
+					System.out.println("Es el congelador de antes.");
 				}
 			}
 			case "cocina" -> {
-				System.out.println("Estás en la cocina");
+				System.out.println("Estás en la cocina.");
 			}
 			case "npcAsustado" -> {
-				if (!tresEnRayaHecho) {
+				if (!npcAsustadoVisto) {
 					imprimirHistoria("npcAsustado"); // Descripción del npc
-				} else {
+					npcAsustadoVisto = true;
+				} else if (tresEnRayaHecho){
 					System.out.println("El pequeño ser sigue en la esquina temblando, parece haber dejado de llorar.");
+				} else {
+					System.out.println("Es el \"niño\" de antes");
 				}
 			}
 			case "escalera" -> {
 				if (!monstruoEscaleras) {
 					System.out.println("Estás en una grandes escaleras, unas suben y otras bajan."
-							+ "En la parte de arriba parece haber una figura muy grande");
+							+ "En la parte de arriba parece haber una figura muy grande.");
 				} else {
-					System.out.println("Estás en las escaleras de la mansión");
+					System.out.println("Estás en las escaleras de la mansión.");
 				}
 			}
 			case "comedor" -> {
-				if (!tresEnRayaHecho) {
-					System.out.println("Estas en el comedor, parece haber un... ¿niño? O algo parecido en una esquina. ");
+				if (!segundaVisitaComedor) {
+					System.out.println("Estas en el comedor, parece haber un... ¿niño? O algo parecido en una esquina de la derecha. ");
+					segundaVisitaComedor = true;
 				} else {
-					System.out.println("Estás en el comedor");
+					System.out.println("Estás en el comedor.");
 				}
 			}
 			case "salon" -> {
-					System.out.println("Te encuentras en el salón principal de la mansión");					
+					System.out.println("Te encuentras en el salón principal de la mansión.");					
+			}
+			case "comoda" -> {
+				if (!rompecabezasHecho) {
+					System.out.println("Ves una pequeña cómoda");
+				} else {
+					System.out.println("Es la cómoda de antes... No me trae buenos recuerdos.");
+				}
 			}
 		}
 	}
