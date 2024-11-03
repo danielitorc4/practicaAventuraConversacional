@@ -2,6 +2,8 @@ package dam.islasfilipinas.aventuraConversacional;
 
 import java.util.Scanner;
 
+import java.util.Random;
+
 public class practicaAventuraConversacional {
 		
 	static int barraDeVida = 100; // Barra de vida del personaje
@@ -17,6 +19,10 @@ public class practicaAventuraConversacional {
 	static boolean monstruoEscaleras;
 	static boolean tieneNota;
 	static boolean tresEnRayaHecho;
+	static boolean introduccionCasa; // Se activa para dar una introducción de la mansión al entrar por primera vez
+	static boolean palancaSotano; // Es lo mismo que una llave
+	static boolean sotanoAbierto;
+	static boolean rompecabezasHecho; // Puzzle de la cómoda
 	
 	public static void main(String[] args) {
 		Scanner scan = new Scanner(System.in);
@@ -79,13 +85,19 @@ public class practicaAventuraConversacional {
 			case "derecha", "d" -> {
 				x = moverDerecha(mundo, x);
 			}
-			case "entrar", "in" -> {
+			case "entrar", "subir" -> {
 				if (puedeEntrar(tipoCasilla, z)) {  // Verifica si puedes entrar antes de cambiar z
+					if (z == 0 && tipoCasilla.equals("escalera")) { // Ajuste para que no salga a a la capa 1 desde la escalera
+						z++; 
+					}
 					z = accionEntrar(mundo, x, y, z);
 				}
 			}
-			case "salir", "out" -> {
+			case "salir", "bajar" -> {
 				if (puedeSalir(tipoCasilla, z)) {  // Verifica si puedes salir antes de cambiar z
+					if (z == 2 && tipoCasilla.equals("escalera")) { // Ajuste para que no salga a la capa 1 desde la escalera
+						z--;
+					}
 					z = accionSalir(z);
 				}
 			}
@@ -102,6 +114,11 @@ public class practicaAventuraConversacional {
 		
 		tipoCasilla = mundo[x][y][z]; // Obtener el tipo de casilla actual
         
+		if (z == 3 && !perroLadrando) {
+			System.out.println("El monstruo corre hacia ti a 4 patas y chillando.");
+			perderVida(1000);
+		}
+		
         // Verifica colisiones antes de actualizar la posición
         if (!puedeMoverse(tipoCasilla)) {
             return; // Salir si hay colisión
@@ -143,6 +160,8 @@ public class practicaAventuraConversacional {
 	}
 
 	private static void accionInteractuar(String tipoCasilla) {
+		Scanner scan = new Scanner(System.in); // Para los minijuegos
+		
 		switch (tipoCasilla) {
 			case "entrada" -> {
 				if (!llaveMansion) {
@@ -174,10 +193,68 @@ public class practicaAventuraConversacional {
 					System.out.println("El perro está muerto...");
 				}
 			}
+			case "sotano" -> {
+				if (!palancaSotano) {
+					System.out.println("El sótano está tapado con unas tablas, tiene que haber alguna forma de quitarlas...");
+				} else if (!sotanoAbierto) {
+					System.out.println("Has arrancado las tablas con la palanca");
+					sotanoAbierto = true;
+				} else {
+					System.out.println("El sótano ya está abierto");
+				}
+			}
+			case "comoda" -> {
+				if (!rompecabezasHecho) {
+					ejecutarRompecabezasComoda(scan);
+				} else if (!tieneNota) {
+					imprimirHistoria("nota");
+				} else {
+					System.out.println("No hay nada más de valor");
+				}
+			}
 			default -> {
 				System.out.println("No hay nada con lo que interactuar");
 			}
 		}
+		scan.close();
+	}
+
+	private static void ejecutarRompecabezasComoda(Scanner scan) {
+		System.out.println("Intentas abrir el cajón de la cómoda y un mecanismo de agarra el brazo. \n P"
+				+ "Parece haber un rompecabezas que resolver");
+		
+		String solucionPuzzle = "olvidar";
+		String solucionDesordenada = desordenarLetras(solucionPuzzle);
+		String respuestaUsuario;
+		
+		
+		System.out.println("Parece que hay una palabra cuyas letras hay que ordenar");
+		do { // Bucle hasta que lo resuelvas o mueras
+			System.out.println("Pone: " + solucionDesordenada);
+			respuestaUsuario = scan.nextLine().toLowerCase();
+			if (respuestaUsuario != solucionPuzzle) {
+				perderVida(25);
+				System.out.println("Una aguja te atraviesa el brazo, parece que esa no era la respuesta...");
+			} else {
+				System.out.println("El mecanismo te ha soltado, resolviste el rompecabezas");
+				rompecabezasHecho = true;
+			}
+		} while (respuestaUsuario != solucionPuzzle);
+	}
+	
+	private static String desordenarLetras(String palabra) {
+	    char[] letras = palabra.toCharArray();
+	    Random random = new Random();
+
+	    for (int i = 0; i < letras.length; i++) {
+	        int j = random.nextInt(letras.length); // Índice aleatorio
+	        // Intercambiar letras[i] y letras[j]
+	        char aux = letras[i];
+	        letras[i] = letras[j];
+	        letras[j] = aux;
+	    }
+
+	    return new String(letras);
 	}
 	
 	private static int moverDerecha(String[][][] mundo, int x) {
@@ -243,7 +320,21 @@ public class practicaAventuraConversacional {
 		
 		switch (tipoCasilla) { // Ir añadiendo más tipos de casilla como "escaleras" 
 			case "entrada" -> {
-				return true;
+				if (z < 2 && mansionAbierta) {// Limitar pisos y llave
+					return true;
+				} else {
+					if (!mansionAbierta) {
+						System.out.println("La puerta está cerrada");
+					}
+					return false;
+				}
+			}
+			case "escalera" -> {
+				if (z < 3) { // Limitar pisos
+					return true;
+				} else {
+					return false;
+				}
 			}
 			default -> {
 				System.out.println("No parece haber ninguna entrada"); 
@@ -264,6 +355,14 @@ public class practicaAventuraConversacional {
 					return false;
 				}
 			} 
+			case "escalera" -> {
+				if (z >= 0) {
+					System.out.println("Has bajado las escaleras");
+					return true;
+				} else {
+					return false;
+				}
+			}
 			default -> {
 				System.out.println("No parece haber ninguna salida"); 
 				return false;
@@ -342,13 +441,6 @@ public class practicaAventuraConversacional {
 		mundo[5][7][1] = "entrada";
 	}
 	
-	public static int perderVida(int damage) {
-		barraDeVida -= damage; // Restarle el daño recibido a la vida
-		System.out.printf("Tienes %d de vida \n", barraDeVida);
-		return barraDeVida; // Devolver la vida actual
-	}
-	
-	
 	private static void inicializarPiso2(String[][][] mundo) {
 		
 		for (int x = 0; x <= 10; x++) {
@@ -417,6 +509,7 @@ public class practicaAventuraConversacional {
 		mundo[0][2][2] = "congelador";
 		mundo[1][1][2] = "cocina"; // Es excepción porque metí esa fila en el bucle que empieza por x = 0
 		mundo[10][0][2] = "npcAsustado"; // Npc asustado, aspecto como Boc (Elden Ring) 
+		
 	}
 	
 	public static void imprimirHistoria(String fragmentoHistoria) {
@@ -438,7 +531,23 @@ public class practicaAventuraConversacional {
 						+ "Por respeto solo te llevas la llave. \n"); // Si vuelves una vez recuperes tus recuerdos, podrás coger el medallón y desbloquear otro final
 			}
 			case "nota" -> {
-				// Diálogo de la nota
+				System.out.println("Nota de Daniel\r\n"
+						+ "\r\n"
+						+ "Hoy, me encuentro al borde del abismo. He decidido consumir el brebaje que he creado, un elixir que promete borrar los recuerdos de mis experimentos.\n "
+						+ "Cada día, la culpa me consume más, y las sombras de mi pasado se ciernen sobre mí, susurrando verdades que preferiría olvidar.\n"
+						+ " He cruzado líneas que nunca debí tocar, manipulando la vida misma en busca de respuestas.\n"
+						+ " Pero lo que he descubierto es una carga demasiado pesada para llevar. Antes de que la locura me atrape, debo olvidar. \n"
+						+ "Solo entonces podré encontrar un resquicio de paz en este laberinto de dolor.\n");
+			}
+			case "npcAsustado" -> {
+				System.out.println("\nVes una figura encogida en una esquina, temblando.\n "
+						+ "Sus ojos, grandes y asustados, se clavan en el suelo, evitando cualquier mirada. \n"
+						+ "Sus lágrimas caen  al suelo mientras se cubre la cabeza con las manos, como intentando protegerse\n");
+			}
+			case "salon" -> {
+				System.out.println("El salón principal de la mansión es amplio y descuidado, con polvo acumulado y muebles cubiertos por sábanas viejas\n"
+						+ " A la derecha, una gran escalera conecta con otros pisos. \n "
+						+ "A la izquierda, una puerta conduce a una habitación, y al frente se encuentran las entradas a la cocina y el comedor."); // Descripción del salón
 			}
 			default -> {
 				System.out.println("Este diálogo no existe");
@@ -447,17 +556,6 @@ public class practicaAventuraConversacional {
 		}
 	}
 	
-	
-	private static void descripcionCasilla(String tipoCasilla, int z) {
-		if (tipoCasilla != null) {
-			switch (z) {
-				case 1 -> casillasPiso1(tipoCasilla);
-				case 2 -> casillasPiso2(tipoCasilla);
-				default -> System.out.println("Ubicación desconocida");
-			}
-		}
-	}
-
 	private static void casillasPiso1(String tipoCasilla) {
 		switch (tipoCasilla) {
 			case "jardin" -> System.out.println("Estás en el jardín de la mansión");
@@ -492,11 +590,17 @@ public class practicaAventuraConversacional {
 		}
 	}
 
-
 	private static void casillasPiso2(String tipoCasilla) {
 		
 		switch (tipoCasilla) {
-			case "entrada" -> System.out.println( "Estás en la entrada de la mansión");
+			case "entrada" -> {
+				if (!introduccionCasa) {
+					imprimirHistoria("salon");
+					introduccionCasa = true;
+				} else {
+					System.out.println( "Estás en la entrada de la mansión");
+				}	
+			}
 			case "habitación" -> {
 				if (!tieneNota) {
 					System.out.println("Estás en una habitación, parece que hay una cómoda en una esquina");
@@ -516,9 +620,7 @@ public class practicaAventuraConversacional {
 			}
 			case "npcAsustado" -> {
 				if (!tresEnRayaHecho) {
-					System.out.println("Ves una figura encogida en una esquina, temblando.\n "
-							+ "Sus ojos, grandes y asustados, se clavan en el suelo, evitando cualquier mirada. \n"
-							+ "Sus lágrimas caen  al suelo mientras se cubre la cabeza con las manos, como intentando protegerse\n");
+					imprimirHistoria("npcAsustado"); // Descripción del npc
 				} else {
 					System.out.println("El pequeño ser sigue en la esquina temblando, parece haber dejado de llorar.");
 				}
@@ -538,15 +640,27 @@ public class practicaAventuraConversacional {
 					System.out.println("Estás en el comedor");
 				}
 			}
-			
+			case "salon" -> {
+					System.out.println("Te encuentras en el salón principal de la mansión");					
+			}
+		}
+	}
+
+	private static void descripcionCasilla(String tipoCasilla, int z) {
+		if (tipoCasilla != null) {
+			switch (z) {
+				case 1 -> casillasPiso1(tipoCasilla);
+				case 2 -> casillasPiso2(tipoCasilla);
+				default -> System.out.println("Ubicación desconocida");
+			}
 		}
 	}
 	
 	public static void impresionesRestantes(String impresion) { 
 		switch (impresion) {
 			case "menu" -> {
-				System.out.printf(" Arriba / W %n Izquierda / A %n Abajo / S %n Derecha / D %n Entrar %n "
-						+ "Salir %n Interactuar / E %n Terminar = salir del juego %n Mapa / M %n%n");
+				System.out.printf(" Arriba / W %n Izquierda / A %n Abajo / S %n Derecha / D %n Entrar / Subir %n "
+						+ "Salir / Bajar %n Interactuar / E %n Terminar = salir del juego %n Mapa / M %n%n");
 			}
 			case "mapa", "m" -> {
 				System.out.println("No implementado");
@@ -555,6 +669,12 @@ public class practicaAventuraConversacional {
 				System.out.println("No hay texto asignado");
 			}
 		}
+	}
+	
+	public static int perderVida(int damage) {
+		barraDeVida -= damage; // Restarle el daño recibido a la vida
+		System.out.printf("Tienes %d de vida \n", barraDeVida);
+		return barraDeVida; // Devolver la vida actual
 	}
 	
 }
