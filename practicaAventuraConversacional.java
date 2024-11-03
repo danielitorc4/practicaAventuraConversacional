@@ -24,8 +24,10 @@ public class practicaAventuraConversacional {
 	static boolean sotanoAbierto;
 	static boolean rompecabezasHecho; // Puzzle de la cómoda
 	
+	static Scanner scan = new Scanner(System.in); // Este Scanner va a ser static hasta encontrar una alternativa ya que da error cerrar un nuevo Scanner
+												  // dentro de un método y no me gusta la idea de meterlo como parámetro porque entraría también en moverse como uno.
+	
 	public static void main(String[] args) {
-		Scanner scan = new Scanner(System.in);
 		boolean fin = false, terminar = false;
 		String[][][] mundo = new String[11][9][4];
 		int[] posicion = { 5, 3, 1 }; // Posición inicial del jugador en el piso base
@@ -160,7 +162,6 @@ public class practicaAventuraConversacional {
 	}
 
 	private static void accionInteractuar(String tipoCasilla) {
-		Scanner scan = new Scanner(System.in); // Para los minijuegos
 		
 		switch (tipoCasilla) {
 			case "entrada" -> {
@@ -216,7 +217,6 @@ public class practicaAventuraConversacional {
 				System.out.println("No hay nada con lo que interactuar");
 			}
 		}
-		scan.close();
 	}
 
 	private static void ejecutarRompecabezasComoda(Scanner scan) {
