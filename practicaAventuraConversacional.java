@@ -245,6 +245,7 @@ public class practicaAventuraConversacional {
 			}
 		}
 	}
+	
 	private static void ejecutarTresEnRaya() {
 		
 		System.out.println("Ves un par de cuchillos tirados por el suelo y unas marcas como de tres en raya en el suelo\n"
@@ -549,12 +550,15 @@ public class practicaAventuraConversacional {
 		}
 	}
 	
-	public static void inicializarMundo(String[][][] mundo) {
+	public static void inicializarMundo(String[][][] mundo) { // Es posible que deba inicializar los pisos justo antes de cambiar la z por primera vez?
 
 		inicializarPiso1(mundo);
 		inicializarPiso2(mundo);
+		inicializarPiso3(mundo);
+		inicializarPiso0(mundo);
+		
 	}
-
+															  // Acabo de caer en que los bucles for los podía meter todos en 1 solo y restar y al final
 	private static void inicializarPiso1(String[][][] mundo) {
 		for (int x = 0; x <= 10; x++) {
 			mundo[x][8][1] = "casa"; 	// Casa en la fila 1 (y=8)
@@ -673,6 +677,220 @@ public class practicaAventuraConversacional {
 		
 	}
 	
+	private static void inicializarPiso3(String[][][] mundo) {
+		
+		for (int x = 0; x <= 10; x++) {
+			mundo[x][8][3] = "casa"; 	// Casa y = 8
+			mundo[x][0][3] = "casa";	// Casa y = 0
+		}
+		
+		for (int x = 0; x <= 10; x++) { // y = 7
+			if (x == 0) {
+				mundo [x][7][3] = "casa";
+			} else if (x <= 3) {
+				mundo [x][7][3] = "salaDelCuadro";
+			} else if (x == 4 || x == 5) {
+				mundo[x][7][3] = "casa";
+			} else {
+				mundo[x][7][3] = (x == 10) ? "entrada" : "salonPisoArriba";
+			}
+		}
+		
+		for (int x = 0; x <= 10; x++) { // y = 6
+			if (x == 0) {
+				mundo[x][6][3] = "casa";
+			} else if (x == 1) {
+				mundo[x][6][3] = "cuadro";
+			} else if (x <= 3) {
+				mundo[x][6][3] = "salaDelCuadro";
+			} else if (x == 4 || x == 5) {
+				mundo[x][6][3] = "pasillo";
+			} else {
+				mundo[x][6][3] = (x == 10) ? "entrada" : "salonPisoArriba";
+			}
+		}
+		
+		for (int x = 0; x <= 10; x++) { // y = 5
+			if (x == 0 || x == 10) {
+				mundo[x][5][3] = "casa";
+			} else if (x < 4) {
+				mundo[x][5][3] = "salaDelCuadro";
+			} else if (x > 5) {
+				mundo[x][5][3] = "salonPisoArriba";
+			} else {
+				mundo[x][5][3] = "pasillo";
+			}
+		}
+		
+		for (int x = 0; x <= 10; x++) { // y = 4
+			mundo[x][4][3] = (x == 4 || x == 5) ? "pasillo" : "casa";
+		}
+		
+		for (int x = 0; x <= 10; x++) { // y = 3
+			switch (x) {
+				case 0, 3, 6, 10 -> {
+					mundo[x][3][3] = "casa";
+				}
+				case 1, 2 -> {
+					mundo[x][3][3] = "habitacionNiño";
+				}
+				case 4, 5 -> {
+					mundo[x][3][3] = "pasillo";
+				}
+				case 7, 8, 9 -> {
+					mundo[x][3][3] = "armario";
+				}
+			}
+		}
+		
+		for (int x = 0; x <= 10; x++) { // y = 2
+			if (x == 0 || x == 10) {
+				mundo[x][2][3] = "casa";
+			} else if (x < 4) {
+				mundo[x][2][3] = "habitacionNiño";		
+			} else if (x > 5) {
+				mundo[x][2][3] = "habitacionPadre";
+			} else {
+				mundo[x][2][3] = "pasillo";
+			}
+		}
+	
+		for (int x = 0; x <= 10; x++) { // y = 1
+			switch (x) {
+				case 0, 10 -> {
+					mundo[x][1][3] = "casa";
+				}
+				case 1 -> {
+					mundo[x][1][3] = "juguetes";
+				}
+				case 2, 3 -> {
+					mundo[x][1][3] = "habitacionNiño";
+				}
+				case 4, 5 -> {
+					mundo[x][1][3] = "pasillo";
+				}
+				case 6, 7, 8 -> {
+					mundo[x][1][3] = "habitacionPadre";
+				}
+				case 9 -> {
+					mundo[x][1][3] = "mesita";
+				}
+			}
+		}
+		
+	}
+	
+
+	private static void inicializarPiso0(String [][][] mundo) {
+		
+		for (int x = 0; x <= 10; x++) { // y = 8
+			mundo[x][8][0] = "agua";
+		}
+		
+		for (int x = 0; x <= 10; x++) { // y == 7
+			switch (x) {
+				case 0, 1, 8, 9 -> {
+					mundo[x][7][0] = "garaje";
+				}
+				case 2, 3, 4, 7 -> {
+					mundo[x][7][0] = "agua";
+				}
+				case 5, 6 -> {
+					mundo[x][7][0] = "casa";
+				}
+				case 10 -> {
+					mundo[x][7][0] = "entrada";
+				}
+			}
+		}
+		
+		for (int x = 0; x <= 10; x++) { // y = 6
+			switch (x) {
+				case 0 -> {
+					mundo[x][6][0] = "estanteria";
+				}
+				case 1, 2, 8, 9 -> {
+					mundo[x][6][0] = "garaje";
+				}
+				case 3, 4, 7 -> {
+					mundo[x][6][0] = "agua";
+				}
+				case 5, 6 -> {
+					mundo[x][6][0] = "casa";
+				}
+				case 10 -> {
+					mundo[x][6][0] = "entrada";
+				}
+			}
+		}
+		
+		for (int x = 0; x <= 10; x++) { // y = 5
+			if (x < 4 || x > 8) {
+				mundo[x][5][0] = "garaje";
+			} else {
+				mundo[x][5][0] = "agua";
+			}
+		}
+		
+		for (int x = 0; x <= 10; x++) { // y = 4
+			if (x == 1) {
+				mundo[x][4][0] = "agua";
+			} else if (x < 4 || x > 8) {
+				mundo[x][4][0] = "garaje";
+			} else {
+				mundo[x][4][0] = "agua";
+			}
+		}
+		
+		for (int x = 0; x <= 10; x++) { // y = 3
+			switch (x) {
+				case 0, 1, 5, 8 -> {
+					mundo[x][3][0] = "agua";
+				}
+				default -> {
+					mundo[x][3][0] = "garaje";
+				}
+			}
+		}
+		
+		for (int x = 0; x <= 10; x++) { // y = 2
+			switch (x) {
+				case 0, 8 -> {
+					mundo[x][2][0] = "agua";
+				}
+				case 1, 2, 6, 7 -> {
+					mundo[x][2][0] = "casa";
+				}
+				default -> {
+					mundo[x][2][0] = "garaje";
+				}
+			}
+		}
+		
+		for (int x = 0; x <= 10; x++) { // y = 1
+			switch (x) {
+				case 0, 3 -> {
+					mundo[x][1][0] = "agua";
+				}
+				case 1, 2 -> {
+					mundo[x][1][0] = "casa";
+				}
+				default -> {
+					mundo[x][1][0] = "garaje";
+				}
+			}
+		}
+		
+		for (int x = 0; x <= 10; x++) { // y = 0
+			if (x < 4) {
+				mundo[x][0][0] = "agua";
+			} else {
+				mundo[x][0][0] = "garaje";
+			}
+		}
+		
+	}
+	
 	public static void imprimirHistoria(String fragmentoHistoria) {
 		switch (fragmentoHistoria) {
 		
@@ -727,6 +945,7 @@ public class practicaAventuraConversacional {
 		}
 	}
 	
+	
 	private static void casillasPiso1(String tipoCasilla) {
 		switch (tipoCasilla) {
 			case "jardin" -> System.out.println("Estás en el jardín de la mansión");
@@ -761,6 +980,7 @@ public class practicaAventuraConversacional {
 		}
 	}
 
+	
 	private static void casillasPiso2(String tipoCasilla) {
 		
 		switch (tipoCasilla) {
@@ -828,6 +1048,7 @@ public class practicaAventuraConversacional {
 		}
 	}
 
+	
 	private static void descripcionCasilla(String tipoCasilla, int z) {
 		if (tipoCasilla != null) {
 			switch (z) {
@@ -837,6 +1058,7 @@ public class practicaAventuraConversacional {
 			}
 		}
 	}
+	
 	
 	public static void impresionesRestantes(String impresion) { 
 		switch (impresion) {
@@ -852,6 +1074,7 @@ public class practicaAventuraConversacional {
 			}
 		}
 	}
+	
 	
 	public static int perderVida(int damage) {
 		barraDeVida -= damage; // Restarle el daño recibido a la vida
