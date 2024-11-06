@@ -127,7 +127,7 @@ public class practicaAventuraConversacional {
 		}
 		
         // Verifica colisiones antes de actualizar la posición
-        if (!puedeMoverse(tipoCasilla)) {
+        if (!puedeMoverse(tipoCasilla, z)) {
             return; // Salir si hay colisión
         }
         
@@ -462,7 +462,7 @@ public class practicaAventuraConversacional {
 		return y;
 	}
 
-	private static boolean puedeMoverse(String tipoCasilla) {
+	private static boolean puedeMoverse(String tipoCasilla, int z) {
  
         switch (tipoCasilla) {
 	        case "casa" -> {
@@ -474,8 +474,10 @@ public class practicaAventuraConversacional {
 	        	if (tieneLancha == false) {
 	        		System.out.println("Ves el agua en tus pies. Nadar sería inútil... debe haber otro modo");
 	                return false; // No se puede mover a agua sin lancha
+	        	} else if (z == 1) {
+	        		return true; // Se puede mover si tiene lancha y z = 1, es decir el exteior
 	        	} else {
-	        		return true;
+	        		return false; // No se puede mover en el agua del sótano por ejemplo
 	        	}
 	        }
 	        default -> {
@@ -550,7 +552,7 @@ public class practicaAventuraConversacional {
 		}
 	}
 	
-	public static void inicializarMundo(String[][][] mundo) { // Es posible que deba inicializar los pisos justo antes de cambiar la z por primera vez?
+	public static void inicializarMundo(String[][][] mundo) { 
 
 		inicializarPiso1(mundo);
 		inicializarPiso2(mundo);
@@ -558,337 +560,358 @@ public class practicaAventuraConversacional {
 		inicializarPiso0(mundo);
 		
 	}
-															  // Acabo de caer en que los bucles for los podía meter todos en 1 solo y restar y al final
+															  
 	private static void inicializarPiso1(String[][][] mundo) {
-		for (int x = 0; x <= 10; x++) {
-			mundo[x][8][1] = "casa"; 	// Casa en la fila 1 (y=8)
-			mundo[x][4][1] = "jardin"; 	// Casillas blancas en la fila 4
-			mundo[x][1][1] = "agua";	// Agua en la fila 8 (y=1)
-		}
-		// Casa en la fila 2 (y=7) excepto en la posición (5,7,1)
-		for (int x = 0; x <= 10; x++) {
-			 mundo[x][7][1] = (x == 5) ? "entrada" : "casa";
-		}
 		
-		// Casilla blanca en las filas 6 y 5
-		for (int x = 0; x <= 10; x++) {
-			mundo[x][6][1] = ( x < 2) ? "caseta" : "jardin";
-			mundo[x][5][1] = ( x < 2) ? "caseta" : "jardin";
-		}
-		
-		// Casillas de la fila 3
-		for (int x = 0; x <= 10; x++) {
-			switch (x) {
-				case 0, 1 -> {
-					mundo[x][3][1] = "cobertizo";
-				}
-				case 5 -> {
-					mundo[5][3][1] = "inicio";
-				}
-				case 7 -> {
-					mundo[7][3][1] = "lancha";
-				}
-				case 8, 9, 10 -> {
-					mundo[x][3][1] = "agua";
-				}
-				default -> {
-					mundo[x][3][1] = "jardin";
+		for (int y = 8; y > 0; y--) {
+			for (int x = 0; x <= 10; x++) { // Hay varios case que se pueden juntar pero me parece más legible separarlo
+				switch (y) {
+					case 8 -> {
+						mundo[x][8][1] = "casa"; 		
+					}
+					case 7 -> {
+						mundo[x][7][1] = (x == 5) ? "entrada" : "casa";
+					}
+					case 6 -> { 
+						mundo[x][6][1] = ( x < 2) ? "caseta" : "jardin";
+					}
+					case 5 -> {
+						mundo[x][5][1] = ( x < 2) ? "caseta" : "jardin";
+					}
+					case 4 -> {
+						mundo[x][4][1] = "jardin"; 
+					}
+					case 3 -> {
+						switch (x) {
+							case 0, 1 -> {
+								mundo[x][3][1] = "cobertizo";
+							}
+							case 5 -> {
+								mundo[5][3][1] = "inicio";
+							}
+							case 7 -> {
+								mundo[7][3][1] = "lancha";
+							}
+							case 8, 9, 10 -> {
+								mundo[x][3][1] = "agua";
+							}
+							default -> {
+								mundo[x][3][1] = "jardin";
+							}
+						}
+					}
+					case 2 -> {
+						 mundo[x][2][1] = (x <= 8) ? "agua" : "continente";
+					}
+					case 1 -> {
+						 mundo[x][1][1] = (x <= 8) ? "agua" : "continente";
+					}
+					case 0 -> {
+						mundo[x][0][1] = "continente";
+					}
 				}
 			}
 		}
-		
-		// Casillas de la fila 2
-		for (int x = 0; x <= 10; x++) {
-			 mundo[x][2][1] = (x <= 8) ? "agua" : "continente";
-		}
-
-		// Aquí las excepciones
-		mundo[5][7][1] = "entrada";
 	}
 	
 	private static void inicializarPiso2(String[][][] mundo) {
 		
-		for (int x = 0; x <= 10; x++) {
-			mundo[x][8][2] = "casa"; // Casa en la primera fila
-		}
-		
-		for (int x = 3; x <= 9; x++) { // De x = 3 a x = 9 es salon, menos x = 5 que es la entrada
-			 mundo[x][7][2] = (x == 5) ? "entrada" : "salon";
-		}
-		
-		for (int x = 0; x <= 9; x++) {
-			mundo[x][6][2] = (x < 3) ? "habitacion" : "salon"; // 0-2 habitacion, 3-6 salon
-		}
-		 for (int x = 0; x <= 10; x++) {
-		        if (x < 7) {
-		            mundo[x][5][2] = (x < 3) ? "habitacion" : "salon"; // 0-2 habitación, 3-6 salón
-		            mundo[x][4][2] = (x == 2) ? "casa" : (x < 3) ? "habitacion" : "salon"; // 2 casa, 0-1 habitación, 3-6 salón
-		        } else {
-		            mundo[x][5][2] = "casa";  // 7-10 casa
-		            mundo[x][4][2] = "casa";  // 7-10 casa
-		        }
-		    }
-		
-		for (int x = 0; x <= 10; x++) {
-			switch (x) {
-				case 3 -> {
-					mundo[x][3][2] = "cocina";  // 3 cocina
-				}
-				case 5, 6 -> {
-					mundo[x][3][2] = "comedor";  // 5, 6 comedor
-				}
-				default -> {
-					mundo[x][3][2] = "casa";  // El resto casa
+		for (int y = 8; y > 0; y--) {
+			for (int x = 0; x <= 10; x++) { 
+				switch (y) {
+					case 8 -> {
+						mundo[x][8][2] = "casa"; 		
+					}
+					case 7 -> {
+						if (x == 0) {
+							mundo[x][7][2] = "comoda";
+						} else if (x == 1) {
+							mundo[x][7][2] = "habitacion";
+						} else if (x == 10) {
+							mundo[10][7][2] = "escalera";
+						} else {
+							mundo[x][7][2] = (x == 5) ? "entrada" : "salon";
+						}		
+					}
+					case 6 -> { 
+						if (x < 10) {
+							mundo[x][6][2] = (x < 3) ? "habitacion" : "salon";							
+						} else {
+							mundo[x][6][2] = "escalera";
+						}
+					}
+					case 5 -> {
+						if (x < 7) {
+							mundo[x][5][2] = (x < 3) ? "habitacion" : "salon";
+						} else {
+							mundo[x][5][2] = "casa";
+						}
+					}
+					case 4 -> {
+						if (x < 7) {
+							mundo[x][4][2] = (x == 2) ? "casa" : (x < 3) ? "habitacion" : "salon";
+						} else {
+							mundo[x][4][2] = "casa"; 
+						}
+					}
+					case 3 -> {
+						switch (x) {
+							case 3 -> {
+								mundo[x][3][2] = "cocina";  
+							}
+							case 5, 6 -> {
+								mundo[x][3][2] = "comedor"; 
+							}
+							default -> {
+								mundo[x][3][2] = "casa";
+							}
+						}
+					}
+					case 2 -> {
+						if (x == 0) {
+							mundo[0][2][2] = "congelador";
+						} else if (x == 4) {
+							mundo[x][2][2] = "casa";  
+						} else if (x < 4) {
+							mundo[x][2][2] = "cocina"; 
+						} else {
+							mundo[x][2][2] = "comedor"; 
+						}
+					}
+					case 1 -> {
+						if (x == 4) {
+							mundo[x][1][2] = "casa";  
+						} else if (x < 4) {
+							mundo[x][1][2] = "cocina";
+						} else {
+							mundo[x][1][2] = "comedor"; 
+						}
+					}
+					case 0 -> {
+						if (x == 4) {
+							mundo[x][0][2] = "casa";  
+						} else if (x < 4) {
+							mundo[x][0][2] = "cocina"; 
+						} else if ( x == 10) {
+							mundo[10][0][2] = "npcAsustado";
+						} else {
+							mundo[x][0][2] = "comedor"; 
+						}
+					}
 				}
 			}
 		}
-		
-		for (int x = 1; x <= 10; x++) {
-			if (x == 4) {
-				mundo[x][2][2] = "casa";  // 4 casa
-				mundo[x][1][2] = "casa";  // 4 casa, y = 1
-			} else if (x < 4) {
-				mundo[x][2][2] = "cocina"; // 1-3 cocina
-				mundo[x][1][2] = "cocina"; // 1-3 cocina, y = 1
-			} else {
-				mundo[x][2][2] = "comedor"; // 5-10 comedor
-				mundo[x][1][2] = "comedor"; // 5-10 comedor, y = 1
-			}
-		}
-		
-		for (int x = 0; x <= 9; x++) {
-			if (x == 4) {
-				mundo[x][0][2] = "casa";  // 4 casa
-			} else if (x < 4) {
-				mundo[x][0][2] = "cocina";  // 0-3 cocina
-			} else {
-				mundo[x][0][2] = "comedor"; // 5-10 comedor
-			}
-		}
-		
-		// Aquí las excepciones
-		mundo[0][7][2] = "comoda"; // Aquí la nota explicando la amnesia pero no el motivo de haber tomado lo que sea (eso en el piso de arriba)
-		mundo[1][7][2] = "habitacion";
-		mundo[10][7][2] = "escalera";
-		mundo[10][6][2] = "escalera";
-		mundo[0][2][2] = "congelador";
-		mundo[1][1][2] = "cocina"; // Es excepción porque metí esa fila en el bucle que empieza por x = 0
-		mundo[10][0][2] = "npcAsustado"; // Npc asustado, aspecto como Boc (Elden Ring) 
-		
 	}
 	
 	private static void inicializarPiso3(String[][][] mundo) {
 		
-		for (int x = 0; x <= 10; x++) {
-			mundo[x][8][3] = "casa"; 	// Casa y = 8
-			mundo[x][0][3] = "casa";	// Casa y = 0
-		}
-		
-		for (int x = 0; x <= 10; x++) { // y = 7
-			if (x == 0) {
-				mundo [x][7][3] = "casa";
-			} else if (x <= 3) {
-				mundo [x][7][3] = "salaDelCuadro";
-			} else if (x == 4 || x == 5) {
-				mundo[x][7][3] = "casa";
-			} else {
-				mundo[x][7][3] = (x == 10) ? "entrada" : "salonPisoArriba";
+		for (int y = 8; y > 0; y--) {
+			for (int x = 0; x <= 10; x++) { 
+				switch (y) {
+					case 8 -> {
+						mundo[x][8][3] = "casa";
+					}
+					case 7 -> {
+						if (x == 0) {
+							mundo [x][7][3] = "casa";
+						} else if (x <= 3) {
+							mundo [x][7][3] = "salaDelCuadro";
+						} else if (x == 4 || x == 5) {
+							mundo[x][7][3] = "casa";
+						} else {
+							mundo[x][7][3] = (x == 10) ? "entrada" : "salonPisoArriba";
+						}	
+					}
+					case 6 -> { 
+						if (x == 0) {
+							mundo[x][6][3] = "casa";
+						} else if (x == 1) {
+							mundo[x][6][3] = "cuadro";
+						} else if (x <= 3) {
+							mundo[x][6][3] = "salaDelCuadro";
+						} else if (x == 4 || x == 5) {
+							mundo[x][6][3] = "pasillo";
+						} else {
+							mundo[x][6][3] = (x == 10) ? "entrada" : "salonPisoArriba";
+						}
+					}
+					case 5 -> {
+						if (x == 0 || x == 10) {
+							mundo[x][5][3] = "casa";
+						} else if (x < 4) {
+							mundo[x][5][3] = "salaDelCuadro";
+						} else if (x > 5) {
+							mundo[x][5][3] = "salonPisoArriba";
+						} else {
+							mundo[x][5][3] = "pasillo";
+						}
+					}
+					case 4 -> {
+						mundo[x][4][3] = (x == 4 || x == 5) ? "pasillo" : "casa";
+					}
+					case 3 -> {
+						switch (x) {
+							case 0, 3, 6, 10 -> {
+								mundo[x][3][3] = "casa";
+							}
+							case 1, 2 -> {
+								mundo[x][3][3] = "habitacionNiño";
+							}
+							case 4, 5 -> {
+								mundo[x][3][3] = "pasillo";
+							}
+							case 7, 8, 9 -> {
+								mundo[x][3][3] = "armario";
+							}
+						}
+					}
+					case 2 -> {
+						if (x == 0 || x == 10) {
+							mundo[x][2][3] = "casa";
+						} else if (x < 4) {
+							mundo[x][2][3] = "habitacionNiño";		
+						} else if (x > 5) {
+							mundo[x][2][3] = "habitacionPadre";
+						} else {
+							mundo[x][2][3] = "pasillo";
+						}
+					}
+					case 1 -> {
+						switch (x) {
+							case 0, 10 -> {
+								mundo[x][1][3] = "casa";
+							}
+							case 1 -> {
+								mundo[x][1][3] = "juguetes";
+							}
+							case 2, 3 -> {
+								mundo[x][1][3] = "habitacionNiño";
+							}
+							case 4, 5 -> {
+								mundo[x][1][3] = "pasillo";
+							}
+							case 6, 7, 8 -> {
+								mundo[x][1][3] = "habitacionPadre";
+							}
+							case 9 -> {
+								mundo[x][1][3] = "mesita";
+							}
+						}
+					}
+					case 0 -> {
+						mundo[x][0][3] = "casa";
+					}
+				}
 			}
 		}
-		
-		for (int x = 0; x <= 10; x++) { // y = 6
-			if (x == 0) {
-				mundo[x][6][3] = "casa";
-			} else if (x == 1) {
-				mundo[x][6][3] = "cuadro";
-			} else if (x <= 3) {
-				mundo[x][6][3] = "salaDelCuadro";
-			} else if (x == 4 || x == 5) {
-				mundo[x][6][3] = "pasillo";
-			} else {
-				mundo[x][6][3] = (x == 10) ? "entrada" : "salonPisoArriba";
-			}
-		}
-		
-		for (int x = 0; x <= 10; x++) { // y = 5
-			if (x == 0 || x == 10) {
-				mundo[x][5][3] = "casa";
-			} else if (x < 4) {
-				mundo[x][5][3] = "salaDelCuadro";
-			} else if (x > 5) {
-				mundo[x][5][3] = "salonPisoArriba";
-			} else {
-				mundo[x][5][3] = "pasillo";
-			}
-		}
-		
-		for (int x = 0; x <= 10; x++) { // y = 4
-			mundo[x][4][3] = (x == 4 || x == 5) ? "pasillo" : "casa";
-		}
-		
-		for (int x = 0; x <= 10; x++) { // y = 3
-			switch (x) {
-				case 0, 3, 6, 10 -> {
-					mundo[x][3][3] = "casa";
-				}
-				case 1, 2 -> {
-					mundo[x][3][3] = "habitacionNiño";
-				}
-				case 4, 5 -> {
-					mundo[x][3][3] = "pasillo";
-				}
-				case 7, 8, 9 -> {
-					mundo[x][3][3] = "armario";
-				}
-			}
-		}
-		
-		for (int x = 0; x <= 10; x++) { // y = 2
-			if (x == 0 || x == 10) {
-				mundo[x][2][3] = "casa";
-			} else if (x < 4) {
-				mundo[x][2][3] = "habitacionNiño";		
-			} else if (x > 5) {
-				mundo[x][2][3] = "habitacionPadre";
-			} else {
-				mundo[x][2][3] = "pasillo";
-			}
-		}
-	
-		for (int x = 0; x <= 10; x++) { // y = 1
-			switch (x) {
-				case 0, 10 -> {
-					mundo[x][1][3] = "casa";
-				}
-				case 1 -> {
-					mundo[x][1][3] = "juguetes";
-				}
-				case 2, 3 -> {
-					mundo[x][1][3] = "habitacionNiño";
-				}
-				case 4, 5 -> {
-					mundo[x][1][3] = "pasillo";
-				}
-				case 6, 7, 8 -> {
-					mundo[x][1][3] = "habitacionPadre";
-				}
-				case 9 -> {
-					mundo[x][1][3] = "mesita";
-				}
-			}
-		}
-		
 	}
 	
 
 	private static void inicializarPiso0(String [][][] mundo) {
 		
-		for (int x = 0; x <= 10; x++) { // y = 8
-			mundo[x][8][0] = "agua";
-		}
-		
-		for (int x = 0; x <= 10; x++) { // y == 7
-			switch (x) {
-				case 0, 1, 8, 9 -> {
-					mundo[x][7][0] = "garaje";
-				}
-				case 2, 3, 4, 7 -> {
-					mundo[x][7][0] = "agua";
-				}
-				case 5, 6 -> {
-					mundo[x][7][0] = "casa";
-				}
-				case 10 -> {
-					mundo[x][7][0] = "entrada";
+		for (int y = 8; y > 0; y--) {
+			for (int x = 0; x <= 10; x++) { 
+				switch (y) {
+					case 8 -> {
+						mundo[x][8][0] = "agua";
+					}
+					case 7 -> {
+						switch (x) {
+							case 0, 1, 8, 9 -> {
+								mundo[x][7][0] = "garaje";
+							}
+							case 2, 3, 4, 7 -> {
+								mundo[x][7][0] = "agua";
+							}
+							case 5, 6 -> {
+								mundo[x][7][0] = "casa";
+							}
+							case 10 -> {
+								mundo[x][7][0] = "entrada";
+							}
+						}
+					}
+					case 6 -> { 
+						switch (x) {
+							case 0 -> {
+								mundo[x][6][0] = "estanteria";
+							}
+							case 1, 2, 8, 9 -> {
+								mundo[x][6][0] = "garaje";
+							}
+							case 3, 4, 7 -> {
+								mundo[x][6][0] = "agua";
+							}
+							case 5, 6 -> {
+								mundo[x][6][0] = "casa";
+							}
+							case 10 -> {
+								mundo[x][6][0] = "entrada";
+							}
+						}
+					}
+					case 5 -> {
+						if (x < 4 || x > 8) {
+							mundo[x][5][0] = "garaje";
+						} else {
+							mundo[x][5][0] = "agua";
+						}
+					}
+					case 4 -> {
+						if (x == 1) {
+							mundo[x][4][0] = "agua";
+						} else if (x < 4 || x > 8) {
+							mundo[x][4][0] = "garaje";
+						} else {
+							mundo[x][4][0] = "agua";
+						}
+					}
+					case 3 -> {
+						switch (x) {
+							case 0, 1, 5, 8 -> {
+								mundo[x][3][0] = "agua";
+							}
+							default -> {
+								mundo[x][3][0] = "garaje";
+							}
+						}
+					}
+					case 2 -> {
+						switch (x) {
+							case 0, 8 -> {
+								mundo[x][2][0] = "agua";
+							}
+							case 1, 2, 6, 7 -> {
+								mundo[x][2][0] = "casa";
+							}
+							default -> {
+								mundo[x][2][0] = "garaje";
+							}
+						}
+					}
+					case 1 -> {
+						switch (x) {
+							case 0, 3 -> {
+								mundo[x][1][0] = "agua";
+							}
+							case 1, 2 -> {
+								mundo[x][1][0] = "casa";
+							}
+							default -> {
+								mundo[x][1][0] = "garaje";
+							}
+						}
+					}
+					case 0 -> {
+						if (x < 4) {
+							mundo[x][0][0] = "agua";
+						} else {
+							mundo[x][0][0] = "garaje";
+						}
+					}
 				}
 			}
 		}
-		
-		for (int x = 0; x <= 10; x++) { // y = 6
-			switch (x) {
-				case 0 -> {
-					mundo[x][6][0] = "estanteria";
-				}
-				case 1, 2, 8, 9 -> {
-					mundo[x][6][0] = "garaje";
-				}
-				case 3, 4, 7 -> {
-					mundo[x][6][0] = "agua";
-				}
-				case 5, 6 -> {
-					mundo[x][6][0] = "casa";
-				}
-				case 10 -> {
-					mundo[x][6][0] = "entrada";
-				}
-			}
-		}
-		
-		for (int x = 0; x <= 10; x++) { // y = 5
-			if (x < 4 || x > 8) {
-				mundo[x][5][0] = "garaje";
-			} else {
-				mundo[x][5][0] = "agua";
-			}
-		}
-		
-		for (int x = 0; x <= 10; x++) { // y = 4
-			if (x == 1) {
-				mundo[x][4][0] = "agua";
-			} else if (x < 4 || x > 8) {
-				mundo[x][4][0] = "garaje";
-			} else {
-				mundo[x][4][0] = "agua";
-			}
-		}
-		
-		for (int x = 0; x <= 10; x++) { // y = 3
-			switch (x) {
-				case 0, 1, 5, 8 -> {
-					mundo[x][3][0] = "agua";
-				}
-				default -> {
-					mundo[x][3][0] = "garaje";
-				}
-			}
-		}
-		
-		for (int x = 0; x <= 10; x++) { // y = 2
-			switch (x) {
-				case 0, 8 -> {
-					mundo[x][2][0] = "agua";
-				}
-				case 1, 2, 6, 7 -> {
-					mundo[x][2][0] = "casa";
-				}
-				default -> {
-					mundo[x][2][0] = "garaje";
-				}
-			}
-		}
-		
-		for (int x = 0; x <= 10; x++) { // y = 1
-			switch (x) {
-				case 0, 3 -> {
-					mundo[x][1][0] = "agua";
-				}
-				case 1, 2 -> {
-					mundo[x][1][0] = "casa";
-				}
-				default -> {
-					mundo[x][1][0] = "garaje";
-				}
-			}
-		}
-		
-		for (int x = 0; x <= 10; x++) { // y = 0
-			if (x < 4) {
-				mundo[x][0][0] = "agua";
-			} else {
-				mundo[x][0][0] = "garaje";
-			}
-		}
-		
 	}
 	
 	public static void imprimirHistoria(String fragmentoHistoria) {
