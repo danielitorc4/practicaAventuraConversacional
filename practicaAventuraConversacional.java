@@ -7,31 +7,31 @@ import java.util.Random;
 public class practicaAventuraConversacional {
 		
 	static int barraDeVida = 100; // Barra de vida del personaje
-	static boolean tieneLancha;	 // No sé si hay una manera de agrupar los booleanos, me parece que queda muy sucio
 	static boolean puedeEntrar;  // y me da la sensación de que existe algo para ello
 	static boolean puedeSalir;	  
 	static boolean puedeInteractuar;
-	static boolean llaveMansion; // La llave de la mansión	
-	static boolean mansionAbierta; // La puerta se ha abierto (interactuando con la E en ella teniendo la llave)
-	static boolean carneCongelada; // Carne para el perro
-	static boolean perroLadrando; // Ruido para el monstruo
-	static boolean perroMuerto;
-	static boolean monstruoEscaleras;
-	static boolean tieneNota;
-	static boolean tresEnRayaHecho;
-	static boolean introduccionCasa; // Se activa para dar una introducción de la mansión al entrar por primera vez
-	static boolean palancaSotano; // Es lo mismo que una llave
-	static boolean sotanoAbierto;
-	static boolean rompecabezasHecho; // Puzzle de la cómoda
-	static boolean acertijoResuelto; // Puzzle del congelador
 	static boolean segundaVisitaComedor;
 	static boolean segundaVisitaCocina;
 	static boolean segundaVisitaPisoArriba;
 	static boolean segundaVisitaPasillo;
 	static boolean segundaVisitaHabitacionNino;
 	static boolean segundaVisitaHabitacionPadre;
+	static boolean introduccionCasa; // Se activa para dar una introducción de la mansión al entrar por primera vez
 	static boolean npcAsustadoVisto;
-	static boolean escopeta;
+	static boolean tieneLancha;	 // No sé si hay una manera de agrupar los booleanos, me parece que queda muy sucio
+	static boolean tieneLlaveMansion; // La llave de la mansión	
+	static boolean tieneNota1;
+	static boolean tieneEscopeta;
+	static boolean tienePalancaSotano; // Es lo mismo que una llave
+	static boolean tieneCarneCongelada; // Carne para el perro
+	static boolean mansionAbierta; // La puerta se ha abierto (interactuando con la E en ella teniendo la llave)
+	static boolean perroLadrando; // Ruido para el monstruo
+	static boolean perroMuerto;
+	static boolean monstruoEscaleras;
+	static boolean tresEnRayaHecho;
+	static boolean sotanoAbierto;
+	static boolean rompecabezasHecho; // Puzzle de la cómoda
+	static boolean acertijoResuelto; // Puzzle del congelador
 	static boolean niñoMuerto;	// Relacionado con el bad ending
 	
 	static Scanner scan = new Scanner(System.in); // Este Scanner va a ser static hasta encontrar una alternativa ya que da error cerrar un nuevo Scanner
@@ -172,7 +172,7 @@ public class practicaAventuraConversacional {
 		
 		switch (tipoCasilla) {
 			case "entrada" -> {
-				if (!llaveMansion) {
+				if (!tieneLlaveMansion) {
 					System.out.println("Necesitas una llave");
 				} else if (!mansionAbierta) {
 					System.out.println("Has abierto la puerta");	
@@ -182,15 +182,15 @@ public class practicaAventuraConversacional {
 				}
 			}
 			case "cobertizo" -> {
-				if (!llaveMansion) {
+				if (!tieneLlaveMansion) {
 					imprimirHistoria("cobertizo");
-					llaveMansion = true;
+					tieneLlaveMansion = true;
 				} else {
 					System.out.println("No hay nada que consideres de valor aquí.");
 				}
 			}
 			case "caseta" -> {
-				if (!carneCongelada) {
+				if (!tieneCarneCongelada) {
 					System.out.println("El perro te muerde la pierna");
 					perderVida(20);
 				} else if (!perroMuerto && perroLadrando) {
@@ -204,7 +204,7 @@ public class practicaAventuraConversacional {
 				}
 			}
 			case "sotano" -> {
-				if (!palancaSotano) {
+				if (!tienePalancaSotano) {
 					System.out.println("El sótano está tapado con unas tablas, tiene que haber alguna forma de quitarlas...");
 				} else if (!sotanoAbierto) {
 					System.out.println("Has arrancado las tablas con la palanca");
@@ -216,9 +216,9 @@ public class practicaAventuraConversacional {
 			case "comoda" -> {
 				if (!rompecabezasHecho) {
 					ejecutarRompecabezasComoda(scan);
-				} else if (!tieneNota) {
-					imprimirHistoria("nota");
-					tieneNota = true;
+				} else if (!tieneNota1) {
+					imprimirHistoria("nota1");
+					tieneNota1 = true;
 				} else {
 					System.out.println("No hay nada más de valor");
 				}
@@ -226,9 +226,9 @@ public class practicaAventuraConversacional {
 			case "congelador" -> {
 				if (!acertijoResuelto) {
 					acertijoCongelador(); 
-				} else if (!carneCongelada) {
+				} else if (!tieneCarneCongelada) {
 					System.out.println("Coges un pedazo de carne congelada");
-					carneCongelada = true;
+					tieneCarneCongelada = true;
 				} else {
 					System.out.println("El congelador está vacío");
 				}
@@ -236,7 +236,7 @@ public class practicaAventuraConversacional {
 			case "npcAsustado" -> {
 				if (!tresEnRayaHecho) {
 					ejecutarTresEnRaya();
-				} else if (escopeta) {
+				} else if (tieneEscopeta) {
 					System.out.println("El niño se gira, rogando que no lo hagas, pero decides dispararle con la escopeta.");
 					niñoMuerto = true;
 				} else if (niñoMuerto){
@@ -244,6 +244,12 @@ public class practicaAventuraConversacional {
 				} else {
 					System.out.println("El niño te ignora");
 				}
+			}
+			case "cuadro" -> {
+				System.out.println("Ves el cuadro de una mujer muy bella, te resulta algo familiar");
+			}
+			case "juguete" -> {
+				System.out.println("Has cogido el juguete");
 			}
 			default -> {
 				System.out.println("No hay nada con lo que interactuar");
@@ -790,7 +796,7 @@ public class practicaAventuraConversacional {
 								mundo[x][1][3] = "casa";
 							}
 							case 1 -> {
-								mundo[x][1][3] = "juguetes";
+								mundo[x][1][3] = "juguete";
 							}
 							case 2, 3 -> {
 								mundo[x][1][3] = "habitacionNiño";
@@ -939,7 +945,7 @@ public class practicaAventuraConversacional {
 						+ "En su interior encuentras una llave junto a colgante con la imagen de una mujer. \n"
 						+ "Por respeto solo te llevas la llave. \n"); // Si vuelves una vez recuperes tus recuerdos, podrás coger el medallón y desbloquear otro final
 			}
-			case "nota" -> {
+			case "nota1" -> {
 				System.out.println("Nota de Daniel\r\n"
 						+ "\r\n"
 						+ "Hoy, me encuentro al borde del abismo. He decidido consumir el brebaje que he creado, un elixir que promete borrar los recuerdos de mis experimentos.\n "
@@ -990,7 +996,7 @@ public class practicaAventuraConversacional {
 		switch (tipoCasilla) {
 			case "jardin" -> System.out.println("Estás en el jardín de la mansión");
 			case "cobertizo" -> {
-				if (llaveMansion == false) {
+				if (tieneLlaveMansion == false) {
 					System.out.println("Encuentras un cobertizo. Quizá haya algo útil en su interior."); 
 				} else {
 					System.out.println("Te encuentras en el cobertizo de antes");
@@ -1032,14 +1038,14 @@ public class practicaAventuraConversacional {
 				}	
 			}
 			case "habitación" -> {
-				if (!tieneNota) {
+				if (!tieneNota1) {
 					System.out.println("Estás en una habitación, parece que hay una cómoda en una esquina.");
 				} else {
 					System.out.println("Estás en la habitación de antes, no hay nada de interés.");
 				}
 			}
 			case "congelador" -> {
-				if (!carneCongelada) {
+				if (!tieneCarneCongelada) {
 					System.out.println("Hay un congelador con algo en su interior.");
 				} else {
 					System.out.println("Es el congelador de antes.");
