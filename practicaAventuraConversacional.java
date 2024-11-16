@@ -7,7 +7,7 @@ import java.util.Random;
 public class practicaAventuraConversacional {
 		
 	static int barraDeVida = 100; // Barra de vida del personaje
-	static boolean puedeEntrar;  // y me da la sensación de que existe algo para ello
+	static boolean puedeEntrar;  
 	static boolean puedeSalir;	  
 	static boolean puedeInteractuar;
 	static boolean segundaVisitaComedor;
@@ -16,31 +16,46 @@ public class practicaAventuraConversacional {
 	static boolean segundaVisitaPasillo;
 	static boolean segundaVisitaHabitacionNino;
 	static boolean segundaVisitaHabitacionPadre;
+	static boolean segundaVisitaGaraje;
 	static boolean introduccionCasa; // Se activa para dar una introducción de la mansión al entrar por primera vez
 	static boolean npcAsustadoVisto;
-	static boolean tieneLancha;	 // No sé si hay una manera de agrupar los booleanos, me parece que queda muy sucio
+	static boolean tieneLancha;	 
 	static boolean tieneLlaveMansion; // La llave de la mansión	
 	static boolean tieneNota1;
 	static boolean tieneEscopeta;
 	static boolean tienePalancaSotano; // Es lo mismo que una llave
 	static boolean tieneCarneCongelada; // Carne para el perro
+	static boolean tieneJuguete;
+	static boolean tieneMedallon;
+	static boolean tieneMunicion;
+	static boolean tieneCombustible;
 	static boolean mansionAbierta; // La puerta se ha abierto (interactuando con la E en ella teniendo la llave)
 	static boolean perroLadrando; // Ruido para el monstruo
 	static boolean perroMuerto;
-	static boolean monstruoEscaleras;
+	static boolean monstruoFueraEscaleras;
 	static boolean tresEnRayaHecho;
 	static boolean sotanoAbierto;
+	static boolean nota1Leida;
+	static boolean nota2Leida;
+	static boolean escondidoEnArmario;
 	static boolean rompecabezasHecho; // Puzzle de la cómoda
 	static boolean acertijoResuelto; // Puzzle del congelador
-	static boolean niñoMuerto;	// Relacionado con el bad ending
+	static boolean hijoMuerto;	// Relacionado con el bad ending = el niño te agujereó la gasolina y quedas varado en el mar sin combustible
+	static boolean cuadroReconocido;
+	static boolean hijoFeliz;
+	static boolean persecucionActiva;
+	static boolean monstruoSotano; // Empieza la segunda "persecución", no puedes moverte, o disparas o mueres.
+	static boolean monstruoMuerto;
+	static boolean ending; // Final base
 	
 	static Scanner scan = new Scanner(System.in); // Este Scanner va a ser static hasta encontrar una alternativa ya que da error cerrar un nuevo Scanner
 												  // dentro de un método y no me gusta la idea de meterlo como parámetro porque entraría también en moverse como uno.
 	
 	public static void main(String[] args) {
-		boolean fin = false, terminar = false;
+		boolean terminar = false;
 		String[][][] mundo = new String[11][9][4];
 		int[] posicion = { 5, 3, 1 }; // Posición inicial del jugador en el piso base
+		int turnosParaEsconderse = 7;
 
 		inicializarMundo(mundo); // Llamada a la función para llenar las descripciones
 
@@ -60,13 +75,20 @@ public class practicaAventuraConversacional {
 					moverse(mundo, posicion, direccion);
 	
 				}
+				
+			}
+			
+			if (persecucionActiva) {
+				turnosParaEsconderse--;
+				if (turnosParaEsconderse <= 0) {
+					persecucionFallida();
+				}
 			}
 
-		} while (!terminar && barraDeVida > 0 && !fin);
+		} while (!terminar && barraDeVida > 0 && !ending);
 
-		if (fin) {
-			System.out.println("¡Felicidades, has logrado escapar de la isla!"); /* Se cambiará a algo relacionado con la historia		*
-			 																	  * como mirar hacia atrás pensando en lo que has hecho	*/
+		if (ending) {
+			imprimirHistoria("endingNormal");			 																	
 		} else if (terminar) {
 			System.out.println("Has salido del juego");
 		} else {
@@ -125,6 +147,10 @@ public class practicaAventuraConversacional {
 		}
 		
 		tipoCasilla = mundo[x][y][z]; // Obtener el tipo de casilla actual
+		
+		if (tipoCasilla == "continente") {
+			ending = true;
+		}
         
 		
 		
@@ -185,6 +211,9 @@ public class practicaAventuraConversacional {
 				if (!tieneLlaveMansion) {
 					imprimirHistoria("cobertizo");
 					tieneLlaveMansion = true;
+				} else if (nota2Leida && !tieneMedallon) {
+					System.out.println("Coges el medallón con la foto de tu mujer");
+					tieneMedallon = true;
 				} else {
 					System.out.println("No hay nada que consideres de valor aquí.");
 				}
@@ -198,12 +227,13 @@ public class practicaAventuraConversacional {
 				} else if (!perroLadrando) {
 					System.out.println("El perro devora de 2 mordiscos el filete y comienza a ladrar sin parar");
 					perroLadrando = true;
+					monstruoFueraEscaleras = true;
 				} else {
 					System.out.println("El perro está muerto...");
 					perroMuerto = true;
 				}
 			}
-			case "sotano" -> {
+			case "escalera" -> { // Es sótano en realidad
 				if (!tienePalancaSotano) {
 					System.out.println("El sótano está tapado con unas tablas, tiene que haber alguna forma de quitarlas...");
 				} else if (!sotanoAbierto) {
@@ -236,20 +266,94 @@ public class practicaAventuraConversacional {
 			case "npcAsustado" -> {
 				if (!tresEnRayaHecho) {
 					ejecutarTresEnRaya();
-				} else if (tieneEscopeta) {
+				} else if (tieneEscopeta && !hijoMuerto) {
 					System.out.println("El niño se gira, rogando que no lo hagas, pero decides dispararle con la escopeta.");
-					niñoMuerto = true;
-				} else if (niñoMuerto){
-					System.out.println("Ya no reconoces a tu hijo");
+					hijoMuerto = true;
+				} else if (hijoMuerto){
+					System.out.println("Está muerto");
+				} else if (nota2Leida && tieneJuguete) {
+					System.out.println("Le das el juguete a tu hijo, parece muy contento");
+					hijoFeliz = true;
 				} else {
 					System.out.println("El niño te ignora");
+
 				}
 			}
 			case "cuadro" -> {
-				System.out.println("Ves el cuadro de una mujer muy bella, te resulta algo familiar");
+				if (nota2Leida) {
+					System.out.println("Ves el cuadro de tu mujer, antes de haberla convertido en el monstruo de ahora");
+					cuadroReconocido = true;
+				} else {
+					System.out.println("Ves el cuadro de una mujer muy bella, te resulta algo familiar");					
+				}
+				
 			}
 			case "juguete" -> {
-				System.out.println("Has cogido el juguete");
+				if (!tieneJuguete) {
+					System.out.println("Has cogido el juguete");
+					tieneJuguete = true;
+				} else {
+					System.out.println("No hay nada de interés");
+				}
+				tieneJuguete = true;
+			}
+			case "mesita" -> {
+				if (!nota1Leida && !tienePalancaSotano) {
+					System.out.println("Encuentras una palanca al lado de la mesita");
+					iniciarPersecucion();
+					tienePalancaSotano = true;
+				} else if (!nota2Leida && !tienePalancaSotano){
+					System.out.println("Encuentras una palanca al lado de la mesita y una nota encima, dice lo siguiente: ");
+					imprimirHistoria("nota2");
+					tienePalancaSotano = true;
+					nota2Leida = true;
+				} else if (!nota2Leida && nota1Leida && tienePalancaSotano) {
+					System.out.println("Encuentra una nota encima de la mesita, dice lo siguiente: ");
+					imprimirHistoria("nota2");
+				
+					
+				} else {
+					System.out.println("No hay nada de interés");
+				}
+			}
+			case "armario" -> {
+				if (!escondidoEnArmario) {
+					System.out.println("Te has escondido en el armario");
+					escondidoEnArmario = true;
+					 if (persecucionActiva) {
+				            System.out.println("Ves al monstruo buscándote en la habitación, contienes la respiración todo lo que puedes\n\n Parece que se va...");
+				            persecucionActiva = false; 
+				        }
+				} else {
+					System.out.println("Has salido del armario");
+					escondidoEnArmario = false;
+				}
+			}
+			case "lancha" -> {
+				if (!tieneCombustible) {
+					System.out.println("No tienes combustible"); 
+				} else if (!tieneLancha) {
+					System.out.println("Has llenado de combustible el motor de la lancha y te has subido en ella");
+					tieneLancha = true;
+				} else {
+					System.out.println("No hay nada que hacer");
+				}
+			}
+			case "estanteria" -> {
+				if (!tieneEscopeta) {
+					System.out.println("Una silutea encorbada te detiene, parece querer jugar a un juego bastante peligroso");
+					iniciarRuletaRusa();
+					System.out.println("Parece que todo el ruido llamó la atención del monstruo, deberías coger la munición de la estantería.");
+					monstruoSotano = true;
+					tieneEscopeta = true;
+				} else if (!tieneMunicion) {
+					System.out.println("Has cogido munición y un bote de gasolina");
+					tieneMunicion = true;
+					tieneCombustible = true;
+					iniciarMonstruoSotano();
+				} else {
+					System.out.println("No hay nada de valor;");
+				}
 			}
 			default -> {
 				System.out.println("No hay nada con lo que interactuar");
@@ -480,13 +584,38 @@ public class practicaAventuraConversacional {
 	          	return false;
 	        }
 	        case "agua" -> {
-	        	if (tieneLancha == false) {
+	        	if (tieneLancha == false && z == 1) {
 	        		System.out.println("Ves el agua en tus pies. Nadar sería inútil... debe haber otro modo");
 	                return false; // No se puede mover a agua sin lancha
 	        	} else if (z == 1) {
 	        		return true; // Se puede mover si tiene lancha y z = 1, es decir el exteior
 	        	} else {
+	        		System.out.println("Hay cables tocando el agua, no parece muy seguro");
 	        		return false; // No se puede mover en el agua del sótano por ejemplo
+	        	}
+	        }
+	        case "armario" -> {
+	        	if (escondidoEnArmario) {
+	        		System.out.println("Interactua de nuevo para salir del armario");
+	        		return false;
+	        	} else {
+	        		System.out.println("Interactua de nuevo para salir del armario");
+	        		return true;
+	        	}
+	        }
+	        case "habitacionPadre" -> {
+	        	if (escondidoEnArmario) {
+	        		return false;
+	        	} else {
+	        		return true;
+	        	}
+	        }
+	        case "sotano" -> {
+	        	if (monstruoSotano) { // No se podrá mover cuando viene el mostruo
+	        		System.out.println("El monstruo se acerca, coge la munición de la estantería");
+	        		return false;
+	        	} else {
+	        		return true;
 	        	}
 	        }
 	        default -> {
@@ -504,7 +633,9 @@ public class practicaAventuraConversacional {
 				} else {
 					if (!mansionAbierta) {
 						System.out.println("La puerta está cerrada");
+						return false;
 					}
+					System.out.println("No hay por donde entrar");
 					return false;
 				}
 				
@@ -512,9 +643,12 @@ public class practicaAventuraConversacional {
 			case "escalera" -> {
 				if (z < 3 && (perroLadrando || perroMuerto)) { // Limitar pisos
 					return true;
-				} else {
+				} else if (!monstruoFueraEscaleras) {
 					System.out.println("El monstruo corre hacia ti a toda velocidad");
 					perderVida(1000);
+					return false;
+				} else {
+					System.out.println("No puedes subir más");
 					return false;
 				}
 			}
@@ -528,7 +662,7 @@ public class practicaAventuraConversacional {
 	
 	private static boolean puedeSalir(String tipoCasilla, int z) {
 	
-		switch (tipoCasilla) { // Ir añadiendo más tipos de casilla como "escaleras" , hay que implementar la llave en las escaleras
+		switch (tipoCasilla) { 
 			case "entrada" -> { 
 				if (z > 0) {
 					System.out.println("Has salido de la casa");				
@@ -538,12 +672,20 @@ public class practicaAventuraConversacional {
 				}
 			} 
 			case "escalera" -> {
-				if (z >= 0) {
+				if (z == 2 && sotanoAbierto) {
+					System.out.println("Has bajado las escaleras");
+					return true;
+				} else if (z == 2) {
+					System.out.println("No puedes bajar (prueba a interactuar)");
+					return false;
+				} else if (z == 3) {
 					System.out.println("Has bajado las escaleras");
 					return true;
 				} else {
+					System.out.println("No puedes bajar");
 					return false;
 				}
+			
 			}
 			default -> {
 				System.out.println("No parece haber ninguna salida"); 
@@ -554,7 +696,10 @@ public class practicaAventuraConversacional {
 	
 	private static boolean puedeInteractuar(String tipocasilla) {
 		switch (tipocasilla) {
-			case "cobertizo", "entrada", "caseta", "comoda", "congelador", "npcAsustado" -> {	
+			case "cobertizo", "entrada", "caseta", "comoda", "congelador", "npcAsustado", "cuadro", "juguete", "mesita", "armario", "escalera" -> {	
+				return true;
+			}
+			case "estanteria", "lancha" -> {
 				return true;
 			}
 			default -> {
@@ -733,7 +878,7 @@ public class practicaAventuraConversacional {
 						} else if (x == 4 || x == 5) {
 							mundo[x][7][3] = "casa";
 						} else {
-							mundo[x][7][3] = (x == 10) ? "entrada" : "salonPisoArriba";
+							mundo[x][7][3] = (x == 10) ? "escalera" : "salonPisoArriba";
 						}	
 					}
 					case 6 -> { 
@@ -746,7 +891,7 @@ public class practicaAventuraConversacional {
 						} else if (x == 4 || x == 5) {
 							mundo[x][6][3] = "pasillo";
 						} else {
-							mundo[x][6][3] = (x == 10) ? "entrada" : "salonPisoArriba";
+							mundo[x][6][3] = (x == 10) ? "escalera" : "salonPisoArriba";
 						}
 					}
 					case 5 -> {
@@ -831,7 +976,7 @@ public class practicaAventuraConversacional {
 					case 7 -> {
 						switch (x) {
 							case 0, 1, 8, 9 -> {
-								mundo[x][7][0] = "garaje";
+								mundo[x][7][0] = "sotano";
 							}
 							case 2, 3, 4, 7 -> {
 								mundo[x][7][0] = "agua";
@@ -850,7 +995,7 @@ public class practicaAventuraConversacional {
 								mundo[x][6][0] = "estanteria";
 							}
 							case 1, 2, 8, 9 -> {
-								mundo[x][6][0] = "garaje";
+								mundo[x][6][0] = "sotano";
 							}
 							case 3, 4, 7 -> {
 								mundo[x][6][0] = "agua";
@@ -865,7 +1010,7 @@ public class practicaAventuraConversacional {
 					}
 					case 5 -> {
 						if (x < 4 || x > 8) {
-							mundo[x][5][0] = "garaje";
+							mundo[x][5][0] = "sotano";
 						} else {
 							mundo[x][5][0] = "agua";
 						}
@@ -874,7 +1019,7 @@ public class practicaAventuraConversacional {
 						if (x == 1) {
 							mundo[x][4][0] = "agua";
 						} else if (x < 4 || x > 8) {
-							mundo[x][4][0] = "garaje";
+							mundo[x][4][0] = "sotano";
 						} else {
 							mundo[x][4][0] = "agua";
 						}
@@ -885,7 +1030,7 @@ public class practicaAventuraConversacional {
 								mundo[x][3][0] = "agua";
 							}
 							default -> {
-								mundo[x][3][0] = "garaje";
+								mundo[x][3][0] = "sotano";
 							}
 						}
 					}
@@ -898,7 +1043,7 @@ public class practicaAventuraConversacional {
 								mundo[x][2][0] = "casa";
 							}
 							default -> {
-								mundo[x][2][0] = "garaje";
+								mundo[x][2][0] = "sotano";
 							}
 						}
 					}
@@ -911,7 +1056,7 @@ public class practicaAventuraConversacional {
 								mundo[x][1][0] = "casa";
 							}
 							default -> {
-								mundo[x][1][0] = "garaje";
+								mundo[x][1][0] = "sotano";
 							}
 						}
 					}
@@ -919,7 +1064,7 @@ public class practicaAventuraConversacional {
 						if (x < 4) {
 							mundo[x][0][0] = "agua";
 						} else {
-							mundo[x][0][0] = "garaje";
+							mundo[x][0][0] = "sotano";
 						}
 					}
 				}
@@ -954,6 +1099,16 @@ public class practicaAventuraConversacional {
 						+ " Pero lo que he descubierto es una carga demasiado pesada para llevar. Antes de que la locura me atrape, debo olvidar. \n"
 						+ "Solo entonces podré encontrar un resquicio de paz en este laberinto de dolor.\n");
 			}
+			case "nota2" -> {
+				System.out.println("Nota de Daniel\r\n"
+						+ "\r\n"
+						+ "No puedo huir de la verdad, por mucho que lo desee. Al repasar mis experimentos, una imagen se clava en mi mente: la de mi esposa y mi hijo, atrapados\n"
+						+ "en un horror que yo mismo creé. La desesperación me llevó a cruzar un límite inimaginable.\n"
+						+ "Cuando la ciencia se volvió mi única compañía, utilicé a los que más amaba como sujetos de prueba, convencido de que podría salvarlos de una muerte inminente.\n"
+						+ "Ahora, cada momento de lucidez es un recordatorio de mi traición. Ellos pagaron el precio de mis ambiciones, y sus rostros persiguen mis pensamientos, incluso\n"
+						+ "en mi intento por olvidar. Este brebaje es mi última esperanza para liberarme de esta pesadilla, aunque sé que la culpa jamás me abandonará.\n\n"
+						);
+			}
 			case "npcAsustado" -> {
 				System.out.println("\nVes una figura encogida en una esquina, temblando.\n "
 						+ "Sus ojos, grandes y asustados, se clavan en el suelo, evitando cualquier mirada. \n"
@@ -974,6 +1129,17 @@ public class practicaAventuraConversacional {
 						+ " A la derecha, una gran escalera conecta con otros pisos. \n "
 						+ "A la izquierda, una puerta conduce a una habitación, y al frente se encuentran las entradas a la cocina y el comedor."); // Descripción del salón
 			}
+			case "endingNormal" -> {
+				System.out.println("El motor de la lancha resonaba sobre el silencio del océano mientras Daniel se alejaba de la isla. La oscuridad \n"
+						+ "envolvía el horizonte, y las luces de la costa aún estaban lejos.\r\n"
+						+ "\r\n"
+						+ "Había logrado escapar. No quedaba rastro del terror que lo había perseguido, ni de los secretos que la isla escondía. \n"
+						+ "Pero mientras las olas lo llevaban cada vez más lejos, un vacío inexplicable se asentaba en su pecho, como si algo importante hubiera quedado atrás.\r\n"
+						+ "\r\n"
+						+ "La isla desapareció entre la niebla, llevándose consigo las respuestas que Daniel nunca llegó a buscar.\r\n"
+						+ "\r\n"
+						+ "FIN");
+			}
 			default -> {
 				System.out.println("Este diálogo no existe");
 			}
@@ -987,11 +1153,129 @@ public class practicaAventuraConversacional {
 				case 1 -> casillasPiso1(tipoCasilla);
 				case 2 -> casillasPiso2(tipoCasilla);
 				case 3 -> casillasPiso3(tipoCasilla);
+				case 0 -> casillasPiso0(tipoCasilla);
 				default -> System.out.println("Ubicación desconocida");
 			}
 		}
 	}
 	
+	private static void iniciarMonstruoSotano() {
+		System.out.println("El monstruo se acerta, elige: disparar o morir (cualquier otra respuesta implicará la muerte)");
+		String decision = scan.nextLine();
+		
+		switch (decision) {
+			case "disparar" -> {
+				System.out.println("Has disparado al monstruo y este cayó al agua electrificada. Sobreviviste");
+				monstruoMuerto = true;
+				monstruoSotano = false;
+			}
+			case "morir" -> {
+				System.out.println("Te has dado por vencido");
+				perderVida(1000);
+			}
+			default -> {
+				System.out.println("Opción incorrecta");
+				perderVida(1000);
+			}
+		}
+	}
+
+	private static void iniciarRuletaRusa() {
+		 Random random = new Random();
+	    boolean finJuego = false;
+	    int decision = -1;        
+	    System.out.println("¡Bienvenido a la ruleta rusa!");
+	    while (!finJuego) {
+	        do {
+	        	System.out.println("Es tu turno. Elige: 1. Dispararte a ti mismo, 2. Disparar al oponente");
+	        	if (scan.hasNextInt()) {
+	        		decision = scan.nextInt();	
+	        		scan.nextLine(); 
+	        		if (decision == 1 || decision == 2) {
+	        			break;
+	        		} else {
+	        			System.out.println("Numero no válido. Solo puedes elegir 1 o 2.");
+	        		}
+	        	} else {
+	        		System.out.println("Entrada no válida. Por favor, ingrese 1 o 2.");
+	        	}
+	        } while (true);
+	     
+	        boolean bala = random.nextBoolean(); // true significa que hay bala.
+	        
+	        if (decision == 1) {
+	            if (bala) {
+	                System.out.println("Te disparaste y perdiste");
+	                perderVida(75);
+	            } else {
+	                System.out.println("El tambor está vacío. Sobreviviste.");
+	            }
+	        } else if (decision == 2) {
+	            if (bala) {
+	                System.out.println("¡Le disparaste al oponente y ganaste!");
+	                finJuego = true;
+	                return;
+	            } else {
+	                System.out.println("El tambor está vacío. El oponente sobrevivió.");
+	            }
+	        } else {
+	            System.out.println("Opción no válida. Intenta de nuevo.");
+	        }
+	        
+	     // Turno del oponente
+	        System.out.println("Es el turno del oponente...");
+	        int decisionOponente = random.nextInt(2) + 1;
+	        boolean balaOponente = random.nextBoolean();
+
+	        if (decisionOponente == 1) {
+	            System.out.println("El oponente decidió dispararse a sí mismo.");
+	            if (balaOponente) {
+	                System.out.println("El oponente se disparó y murió.");
+	                System.out.println("¡Has ganado el juego!");
+	                finJuego = true;
+	                return;
+	            } else {
+	                System.out.println("El tambor está vacío. El oponente sobrevivió.");
+	            }
+	        } else {
+	            System.out.println("El oponente decidió dispararte a ti.");
+	            if (balaOponente) {
+	                System.out.println("El oponente te disparó y perdiste.");
+	                perderVida(75);
+	            } else {
+	                System.out.println("El tambor está vacío. Sobreviviste.");
+	            }
+	        } 
+	    } 
+	}
+
+	private static void casillasPiso0(String tipoCasilla) {
+		switch (tipoCasilla) {
+			case "agua" -> {
+				System.out.println("Estás en el agua");
+			}
+			case "sotano" -> {
+				if (!segundaVisitaGaraje) {
+					System.out.println("Has bajado al sótano, parece estar inundado pero por abajo hay un camino");
+					segundaVisitaGaraje = true;
+				} else {
+					System.out.println("Estás en el sótano");
+				}
+			}
+			case "escalera" -> {
+				System.out.println("Estás en las escaleras");
+			}
+			case "estanteria" -> {
+				if (!tieneCombustible) {
+					System.out.println("Hay una estantería con balas y combustible");					
+				} else {
+					System.out.println("No hay nada de valor");
+				}
+			}
+			default -> System.out.println("Estás en una zona desconocida.");
+		}
+	}
+
 	private static void casillasPiso1(String tipoCasilla) {
 		switch (tipoCasilla) {
 			case "jardin" -> System.out.println("Estás en el jardín de la mansión");
@@ -1013,7 +1297,13 @@ public class practicaAventuraConversacional {
 					System.out.println("Estás en la caseta del perro...");
 				}
 			}
-			case "lancha" -> System.out.println("Hay una lancha que podría resultar útil, desgraciadamente no parece tener combustible..."); // Añadir if con boolean
+			case "lancha" -> {
+				if (!tieneLancha) {
+					System.out.println("Hay una lancha que podría resultar útil, desgraciadamente no parece tener combustible..."); // Añadir if con boolean
+				} else {
+					System.out.println("Es la lancha");
+				}
+			}
 			case "inicio" -> System.out.println("Estás en el lugar donde comenzaste tu aventura.");
 			case "entrada" -> {
 				if (mansionAbierta == true) {
@@ -1070,7 +1360,7 @@ public class practicaAventuraConversacional {
 				}
 			}
 			case "escalera" -> {
-				if (!monstruoEscaleras) {
+				if (!monstruoFueraEscaleras) {
 					System.out.println("Estás en una grandes escaleras, unas suben y otras bajan.\n"
 							+ "En la parte de arriba parece haber una figura muy grande.");
 				} else {
@@ -1146,7 +1436,18 @@ public class practicaAventuraConversacional {
 		
 	}
 		
-	public static void impresionesRestantes(String impresion) { 
+	private static void iniciarPersecucion() {
+		 System.out.println("Escuchas fuertes pisadas y gruñidos, ¡Algo se acerca!");
+		    persecucionActiva = true;
+	}
+	
+	private static void persecucionFallida() {
+	    System.out.println("¡No lograste esconderte a tiempo! El monstruo te ha alcanzado...");
+	    perderVida(1000); 
+	    persecucionActiva = false;
+	}
+	
+ 	public static void impresionesRestantes(String impresion) { 
 		switch (impresion) {
 			case "menu" -> {
 				System.out.printf(" Arriba / W %n Izquierda / A %n Abajo / S %n Derecha / D %n Entrar / Subir %n "
