@@ -6,8 +6,12 @@ import java.util.Random;
 
 public class practicaAventuraConversacional {
 		
+	
 	static int barraDeVida = 100; // Barra de vida del personaje
 	static int numeroChoques = 0; // Veces que te has chocado contra una pared
+	static boolean[] triggers = new boolean[100];			// NO IMPLEMENTADO
+	static String[] nombresTriggers = new String[100];		// NO IMPLEMENTADO
+	
 	static boolean puedeEntrar;  
 	static boolean puedeSalir;	  
 	static boolean puedeInteractuar;
@@ -62,7 +66,8 @@ public class practicaAventuraConversacional {
 		int turnosParaEsconderse = 7;
 
 		inicializarMundo(mundo); // Llamada a la función para llenar las descripciones
-
+		inicializarTriggers(); // NO IMPLEMENTADO
+		
 		imprimirHistoria("inicio");
 
 		do {
@@ -1727,6 +1732,54 @@ public class practicaAventuraConversacional {
 		} else {	
 			System.out.println("Has muerto");
 		}
+	}
+
+	public static void inicializarTriggers() { 			// NO IMPLEMENTADO
+		for (int i = 0; i < triggers.length; i++) {
+			triggers[i] = false;
+		}
+		inicializarNombresTriggers();
+	}
+	
+	public static void inicializarNombresTriggers() { 	// NO IMPLEMENTADO
+		nombresTriggers[0] = "puedeEntrar";
+		nombresTriggers[1] = "puedeSalir";
+		nombresTriggers[2] = "puedeInteractuar";
+		nombresTriggers[3] = "segundaVisitaCocina";
+		nombresTriggers[4] = "segundaVisitaPasillo";
+		nombresTriggers[5] = "segundaVisitaHabitacionHijo";
+		nombresTriggers[6] = "segundaVisitaSotano";
+		nombresTriggers[7] = "introduccionCasa";
+		nombresTriggers[8] = "npcAsustadoVisto";
+		nombresTriggers[9] = "tieneLancha";
+		nombresTriggers[10] = "tieneNota1";
+		nombresTriggers[11] = "tieneEscopeta";
+		nombresTriggers[12] = "tienePalancaSotano";
+		nombresTriggers[13] = "tieneCarneCongelada";
+		nombresTriggers[14] = "tieneJuguete";
+		nombresTriggers[15] = "tieneMedallon";
+		nombresTriggers[16] = "tieneMunicion";
+		nombresTriggers[17] = "tieneCombustible";
+		nombresTriggers[18] = "mansionAbierta";
+		nombresTriggers[19] = "perroLadrando";
+		nombresTriggers[20] = "perroMuerto";
+		nombresTriggers[21] = "monstruoFueraEscaleras";
+		nombresTriggers[22] = "tresEnRayaHecho";
+		nombresTriggers[23] = "sotanoAbierto";
+		nombresTriggers[24] = "nota1Leida";
+		nombresTriggers[25] = "nota2Leida";
+		nombresTriggers[26] = "escondidoEnArmario";
+		nombresTriggers[27] = "rompecabezasHecho";
+		nombresTriggers[28] = "acertijoResuelto";
+		nombresTriggers[29] = "hijoMuerto";
+		nombresTriggers[30] = "cuadroReconocido";
+		nombresTriggers[31] = "hijoFeliz";
+		nombresTriggers[32] = "persecucionActiva";
+		nombresTriggers[33] = "monstruoSotano";
+		nombresTriggers[34] = "monstruoMuerto";
+		nombresTriggers[35] = "ending";
+		nombresTriggers[36] = "trueEnding";
+		nombresTriggers[37] = "badEnding";
 	}
 }
 	
